@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e8590c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>まごころ配達ノート</title>
+<style>
+:root{
+  --primary:#e8590c; --primary-dark:#c94e0a; --bg:#f4f1ec; --card:#ffffff;
+  --text:#2b2620; --sub:#8a8378; --line:#e7e2da;
+  --blue:#2f7dd1; --red:#d64545; --orange:#e08a00; --purple:#7a49c9;
+  --green:#1f9d55; --dgreen:#3f9142; --grey:#6f6a63;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.55}
+button{font-family:inherit;font-size:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;width:100%;padding:10px 12px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+label{display:block;font-weight:600;font-size:13px;color:var(--sub);margin:14px 0 5px}
+.note{font-size:12.5px;color:var(--sub)}
+[hidden]{display:none !important}
+
+/* ---------- login ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:400px;background:var(--card);border-radius:20px;
+  padding:28px 24px 24px;box-shadow:0 6px 30px rgba(60,40,10,.10)}
+.logo{font-size:44px;text-align:center}
+.login-card h1{font-size:21px;text-align:center;margin-top:6px}
+.login-card .sub{text-align:center;color:var(--sub);font-size:13px;margin:4px 0 10px}
+.seg{display:flex;background:#efece6;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;padding:9px 4px;border-radius:8px;font-weight:600;color:var(--sub);font-size:14px}
+.seg button.on{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.primary{display:block;width:100%;background:var(--primary);color:#fff;font-weight:700;
+  font-size:16px;padding:13px;border-radius:12px;margin-top:20px}
+.primary:active{background:var(--primary-dark)}
+#mode-note{margin-top:12px;text-align:center}
+
+/* ---------- app frame ---------- */
+#app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+  background:var(--bg);position:relative}
+header{position:sticky;top:0;z-index:20;background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 10px}
+.h-title{font-weight:700;font-size:16px;display:flex;align-items:center;gap:6px}
+#mode-badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.25)}
+#btn-user{background:rgba(255,255,255,.18);border-radius:99px;padding:5px 12px;font-size:13px;font-weight:600}
+main{flex:1;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.view{padding:12px 12px 8px}
+.view h2{font-size:17px;margin:4px 2px 10px}
+
+/* ---------- bottom nav ---------- */
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;
+  background:#fff;border-top:1px solid var(--line);display:flex;z-index:30;
+  padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:8px 0 7px;font-size:10.5px;color:var(--sub);font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+nav button .ni{font-size:21px;line-height:1.2}
+nav button.on{color:var(--primary)}
+.nav-badge{position:absolute;top:3px;right:calc(50% - 24px);background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:99px;
+  display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* ---------- chips / filters ---------- */
+.filters{position:sticky;top:52px;z-index:10;background:var(--bg);padding:2px 0 8px;margin:0 -2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:3px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:#fff;border:1.5px solid var(--line);border-radius:99px;
+  padding:5px 13px;font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* ---------- timeline ---------- */
+.timeline{display:flex;flex-direction:column;gap:9px}
+.date-sep{text-align:center;margin:10px 0 2px}
+.date-sep span{background:#e3ddd2;color:#6f6a63;font-size:11.5px;font-weight:700;
+  padding:3px 12px;border-radius:99px}
+.card{background:var(--card);border-radius:13px;padding:10px 12px 9px;
+  box-shadow:0 1px 3px rgba(60,40,10,.07);border-left:4px solid var(--grey)}
+.card-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge-route{font-size:11px;font-weight:800;color:#fff;background:var(--grey);
+  border-radius:6px;padding:1.5px 7px}
+.badge-cat{font-size:11.5px;font-weight:700}
+.card-time{margin-left:auto;font-size:11.5px;color:var(--sub)}
+.card-main{margin-top:4px;font-size:14.5px}
+.card-main b{font-size:15px}
+.card-memo{font-size:13px;color:var(--sub);margin-top:2px;white-space:pre-wrap}
+.card-foot{display:flex;align-items:center;gap:8px;margin-top:6px}
+.card-author{font-size:12px;color:var(--sub)}
+.st{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;margin-left:auto}
+.st-open{background:#fdeaea;color:var(--red)}
+.st-done{background:#e5f5ec;color:var(--green)}
+.retract{font-size:11px;font-weight:700;color:var(--sub);border:1.5px solid var(--line);
+  border-radius:99px;padding:1px 10px;background:#fff}
+.retract.arm{color:var(--red);border-color:var(--red)}
+.empty{text-align:center;color:var(--sub);padding:40px 10px;font-size:13.5px}
+
+/* ---------- compose ---------- */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.cat-btn{background:#fff;border-radius:14px;padding:14px 8px;text-align:center;
+  box-shadow:0 1px 3px rgba(60,40,10,.07);font-weight:700;font-size:14px;border-top:3px solid var(--grey)}
+.cat-btn .ci{display:block;font-size:26px;margin-bottom:3px}
+.cat-btn.on{outline:2.5px solid var(--primary);outline-offset:-1px}
+#report-form{background:#fff;border-radius:14px;padding:6px 16px 16px;margin-top:12px;
+  box-shadow:0 1px 3px rgba(60,40,10,.07)}
+.chk{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--text);
+  margin-top:16px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--primary);flex:0 0 auto}
+.form-cat-head{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15.5px;margin-top:14px}
+#btn-back-cat{color:var(--primary);font-weight:700;font-size:13px;margin-left:auto}
+
+/* ---------- todo ---------- */
+.todo-card{background:#fff;border-radius:13px;padding:11px 12px;margin-bottom:9px;
+  box-shadow:0 1px 3px rgba(60,40,10,.07);display:flex;gap:10px;align-items:flex-start;
+  border-left:4px solid var(--red)}
+.todo-card.is-done{border-left-color:var(--green);opacity:.75}
+.todo-body{flex:1;min-width:0}
+.todo-check{flex:0 0 auto;width:64px;padding:9px 0;border-radius:10px;background:var(--primary);
+  color:#fff;font-weight:800;font-size:13px;text-align:center}
+.todo-check.undo{background:#efece6;color:var(--sub)}
+.todo-actions{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.todo-del{width:64px;padding:8px 0;border-radius:10px;background:#fdeaea;color:var(--red);
+  font-weight:800;font-size:12px;text-align:center}
+.todo-donenote{font-size:11.5px;color:var(--green);font-weight:700;margin-top:4px}
+
+/* ---------- shift ---------- */
+.cal-head{display:flex;align-items:center;justify-content:center;gap:14px;margin:2px 0 8px}
+.cal-head button{font-size:18px;padding:4px 14px;background:#fff;border-radius:10px;
+  box-shadow:0 1px 3px rgba(60,40,10,.08)}
+#cal-label{font-weight:800;font-size:16.5px;min-width:120px;text-align:center}
+.deadline{font-size:13px;font-weight:800;border-radius:10px;padding:8px 12px;margin:2px 0 8px;text-align:center}
+.deadline.ok{background:#e5f5ec;color:var(--green)}
+.deadline.warn{background:#fdeaea;color:var(--red)}
+.cal-month-title{font-weight:800;font-size:15px;margin:14px 2px 4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cal-wd{text-align:center;font-size:11px;font-weight:700;color:var(--sub);padding:2px 0}
+.cal-wd.sun{color:var(--red)} .cal-wd.sat{color:var(--blue)}
+.cal-cell{aspect-ratio:1/1.15;background:#fff;border-radius:9px;padding:3px 2px;
+  display:flex;flex-direction:column;align-items:center;font-size:13px;
+  box-shadow:0 1px 2px rgba(60,40,10,.06);position:relative}
+.cal-cell.blank{background:transparent;box-shadow:none}
+.cal-cell.today .dnum{background:var(--primary);color:#fff;border-radius:99px}
+.cal-cell.sel{outline:2.5px solid var(--primary);outline-offset:-1px}
+.cal-cell.mysel{background:#e5f5ec;outline:2px solid var(--green);outline-offset:-1px}
+.today-btn{display:block;margin:0 auto 8px;font-size:12.5px;font-weight:700;color:var(--primary);
+  background:#fff;border-radius:99px;padding:5px 16px;box-shadow:0 1px 3px rgba(60,40,10,.1)}
+.dnum{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cal-mine{font-size:10px;color:var(--green);font-weight:900;line-height:1}
+.cal-cnt{font-size:9.5px;color:var(--sub);font-weight:700;margin-top:auto}
+#day-detail{background:#fff;border-radius:14px;padding:14px 16px;margin-top:12px;
+  box-shadow:0 1px 3px rgba(60,40,10,.07)}
+#day-detail h3{font-size:15px;margin-bottom:6px}
+.member-tag{display:inline-block;background:#e5f5ec;color:var(--green);font-weight:700;
+  font-size:13px;padding:3px 12px;border-radius:99px;margin:2px 3px 2px 0}
+
+/* ---------- 写真 ---------- */
+.card-photo{display:block;max-width:170px;max-height:170px;border-radius:10px;margin-top:7px;
+  border:1px solid var(--line)}
+#photo-preview{margin-top:8px;display:flex;align-items:flex-start;gap:10px}
+#photo-preview img{max-width:110px;max-height:110px;border-radius:10px;border:1px solid var(--line)}
+#photo-remove{font-size:12px;font-weight:700;color:var(--red);border:1.5px solid var(--red);
+  border-radius:99px;padding:3px 12px}
+input[type=file]{padding:8px;background:#faf8f5}
+#photo-viewer{position:fixed;inset:0;background:rgba(15,12,8,.93);z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:10px}
+#photo-viewer img{max-width:100%;max-height:85vh;border-radius:8px}
+#photo-viewer .close-hint{color:#ccc;font-size:12.5px;font-weight:600}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);
+  background:rgba(43,38,32,.92);color:#fff;font-size:13.5px;font-weight:600;
+  padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;
+  transition:all .25s;z-index:99;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ========== ログイン ========== -->
+<div id="login">
+  <div class="login-card">
+    <div class="logo">🍱</div>
+    <h1>まごころ配達ノート</h1>
+    <p class="sub">配達報告・要対応・シフトをひとつに</p>
+    <div class="seg" id="login-tab" style="margin-top:16px">
+      <button type="button" data-v="login" class="on">ログイン</button>
+      <button type="button" data-v="register">新規登録</button>
+    </div>
+    <label>お名前</label>
+    <input id="login-name" maxlength="12" autocomplete="off">
+    <label>暗証番号（4〜8桁の数字）</label>
+    <input id="login-pw" type="password" inputmode="numeric" maxlength="8" autocomplete="off">
+    <div id="reg-wrap" hidden>
+      <label>役割</label>
+      <div class="seg" id="login-role">
+        <button type="button" data-v="staff" class="on">配達員</button>
+        <button type="button" data-v="admin">管理者</button>
+      </div>
+      <div id="admin-pin-wrap" hidden>
+        <label>管理者コード</label>
+        <input id="login-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="off">
+      </div>
+    </div>
+    <label>担当ルート（今日の担当）</label>
+    <div class="seg" id="login-route">
+      <button type="button" data-v="1" class="on">1</button>
+      <button type="button" data-v="2">2</button>
+      <button type="button" data-v="3">3</button>
+      <button type="button" data-v="4">4</button>
+      <button type="button" data-v="厨房">厨房</button>
+    </div>
+    <button id="login-go" class="primary">ログイン</button>
+    <p id="mode-note" class="note"></p>
+  </div>
+</div>
+
+<!-- ========== アプリ本体 ========== -->
+<div id="app" hidden>
+  <header>
+    <div class="h-title">🍱 まごころ配達ノート <span id="mode-badge"></span></div>
+    <button id="btn-user" title="名前・ルートを変更"></button>
+  </header>
+  <main>
+
+    <section id="view-timeline" class="view">
+      <div class="filters">
+        <div class="chips" id="chips-route"></div>
+        <div class="chips" id="chips-cat"></div>
+      </div>
+      <div id="timeline" class="timeline"></div>
+    </section>
+
+    <section id="view-compose" class="view" hidden>
+      <h2>報告を送る</h2>
+      <p class="note" style="margin-bottom:10px">種類を選ぶと入力フォームが開きます</p>
+      <div class="cat-grid" id="cat-grid"></div>
+      <form id="report-form" hidden>
+        <div class="form-cat-head"><span id="form-cat-label"></span>
+          <button type="button" id="btn-back-cat">種類を選び直す</button></div>
+        <div id="form-fields"></div>
+        <p class="note" style="margin-top:14px" id="form-action-note"></p>
+        <button class="primary" type="submit">送信する</button>
+      </form>
+    </section>
+
+    <section id="view-todo" class="view" hidden>
+      <h2>要対応リスト</h2>
+      <p class="note" style="margin-bottom:10px" id="todo-note"></p>
+      <div class="seg" id="todo-seg" style="margin-bottom:12px">
+        <button data-v="open" class="on">未処理</button>
+        <button data-v="done">処理済み</button>
+      </div>
+      <div id="todo-list"></div>
+    </section>
+
+    <section id="view-shift" class="view" hidden>
+      <h2>シフト提出</h2>
+      <div class="seg" id="shift-mode" hidden style="margin-bottom:10px">
+        <button data-v="edit" class="on">自分の提出</button>
+        <button data-v="view">みんなの提出を見る</button>
+      </div>
+      <div class="cal-head">
+        <button id="cal-prev">◀</button>
+        <div id="cal-label"></div>
+        <button id="cal-next">▶</button>
+      </div>
+      <button id="btn-cal-today" class="today-btn">📍 今の期間に戻る</button>
+      <div id="deadline-note" class="deadline"></div>
+      <p class="note" id="shift-help"></p>
+      <div id="cal-container"></div>
+      <div id="shift-submit-bar">
+        <div id="shift-sel-count" class="note" style="text-align:center;margin-top:10px"></div>
+        <button id="btn-shift-send" class="primary" style="margin-top:8px">送信して保存</button>
+      </div>
+      <div id="day-detail" hidden></div>
+    </section>
+
+  </main>
+  <nav>
+    <button data-view="timeline" class="on"><span class="ni">💬</span>タイムライン</button>
+    <button data-view="compose"><span class="ni">➕</span>報告する</button>
+    <button data-view="todo"><span class="ni">✅</span>要対応<span class="nav-badge" id="todo-badge" hidden></span></button>
+    <button data-view="shift"><span class="ni">📅</span>シフト</button>
+  </nav>
+</div>
+
+<div id="photo-viewer" hidden><img alt="写真"><div class="close-hint">タップで閉じる</div></div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   まごころ配達ノート
+   ---------------------------------------------------------------------
+   ★ 本番利用（全員でリアルタイム共有）にするには：
+     下の FIREBASE_CONFIG に、Firebaseコンソールで発行される設定を
+     貼り付けてください（手順書「セットアップ手順.md」参照）。
+     null のままだと「デモ体験版」として動きます（データ共有なし）。
+   ===================================================================== */
+const FIREBASE_CONFIG = null;
+
+/* ★ 管理者コード：ログイン時に「管理者」を選ぶには、このコードの入力が必要です。
+   本番で使う前に必ず好きな数字に変更してください。 */
+const ADMIN_CODE = '1234';
+
+/* 例：
+const FIREBASE_CONFIG = {
+  apiKey: "AIza....",
+  authDomain: "magokoro-xxxx.firebaseapp.com",
+  projectId: "magokoro-xxxx",
+  storageBucket: "magokoro-xxxx.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:abcdef"
+};
+*/
+</script>
+<script>
+/* ---------------- 基本ヘルパー ---------------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad2 = n => String(n).padStart(2,'0');
+const dateKey = ts => { const d=new Date(ts);
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); };
+const fmtTime = ts => { const d=new Date(ts); return pad2(d.getHours())+':'+pad2(d.getMinutes()); };
+const WDAYS = ['日','月','火','水','木','金','土'];
+const fmtDateLabel = key => { const [y,m,d]=key.split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  const today=dateKey(Date.now());
+  const suffix = key===today?'（今日）':'（'+WDAYS[dt.getDay()]+'）';
+  return m+'月'+d+'日'+suffix; };
+
+/* localStorage が使えない環境でも動くように */
+const safeStorage = {
+  mem:{},
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return this.mem[k] ?? null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ this.mem[k]=v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){ delete this.mem[k]; } }
+};
+
+/* 暗証番号は平文で保存せず、簡易ハッシュ化して保存する */
+function hashPin(name,pin){
+  let h=5381; const s=name+'::'+pin+'::mgk2026';
+  for(const c of s){ h=(Math.imul(h,33)^c.codePointAt(0))>>>0; }
+  return 'h'+h.toString(36);
+}
+
+let toastTimer=null;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* ---------------- 定義 ---------------- */
+const ROUTES = ['1','2','3','4','厨房'];
+const ROUTE_COLORS = {'1':'#2f7dd1','2':'#1f9d55','3':'#e08a00','4':'#7a49c9','厨房':'#6f6a63'};
+const routeLabel = r => r==='厨房' ? '厨房' : 'ルート'+r;
+const CATS = {
+  absent:{label:'不在・保冷箱', icon:'📦', color:'var(--blue)',   action:false},
+  cancel:{label:'キャンセル・中止', icon:'🚫', color:'var(--red)', action:true},
+  change:{label:'変更・依頼',   icon:'✏️', color:'var(--orange)', action:true},
+  money: {label:'集金・支払い', icon:'💰', color:'var(--purple)', action:true},
+  trial: {label:'試食・新規',   icon:'🌱', color:'var(--green)',  action:true},
+  done:  {label:'配達完了',     icon:'✅', color:'var(--dgreen)', action:false},
+  other: {label:'その他・トラブル', icon:'⚠️', color:'var(--grey)', action:true},
+};
+
+/* ---------------- 状態 ---------------- */
+const MODE = FIREBASE_CONFIG ? 'online' : 'demo';
+/* シフトは「毎月8日締切で、21日〜翌月20日分」を提出する。
+   初期表示は「これから始まる期間」（今日が21日以降なら翌月21日〜） */
+function initPeriod(){
+  const t=new Date();
+  if(t.getDate()>=21){
+    const m=t.getMonth()+1;
+    return m>11 ? {y:t.getFullYear()+1,m:0} : {y:t.getFullYear(),m};
+  }
+  return {y:t.getFullYear(), m:t.getMonth()};
+}
+const state = {
+  user:null,
+  reports:[],           // {id,ts,author,route,cat,customer,detail,memo,needsAction,done,doneBy,doneAt}
+  shifts:{},            // {'2026-07-21': {名前:true,...}}
+  fRoute:'all', fCat:'all',
+  todoTab:'open',
+  period:initPeriod(),  // {y,m} → m月21日〜翌月20日
+  selDate:null,
+  shiftMode:'edit',     // edit=自分の提出 / view=みんなの提出（管理者のみ）
+  shiftSel:null,        // 選択中の日付Set
+  shiftSelPeriod:null,
+  composeCat:null,
+};
+const isAdmin = () => state.user && state.user.role==='admin';
+
+/* ---------------- デモ用サンプルデータ ---------------- */
+function seedReports(){
+  const today = new Date(); today.setSeconds(0,0);
+  const at = (h,m)=>{ const d=new Date(today); d.setHours(h,m); return d.getTime(); };
+  let i=0; const mk = o => ({ id:'demo'+(++i), done:false, needsAction:false, memo:'', customer:'',
+    photoThumb:'', photoId:'', ...o });
+  return [
+    mk({ts:at(9,34),  author:'Homa',   route:'4', cat:'absent', customer:'笠松様', detail:'保冷箱対応', memo:'施錠・不在のため', needsAction:true, done:true, doneBy:'原田', doneAt:at(10,0)}),
+    mk({ts:at(10,12), author:'Homa',   route:'4', cat:'change', customer:'細川真理枝様', detail:'小町小おかずのみ＋元気旬菜プラス → 小町小おかずのみだけに変更希望', needsAction:true}),
+    mk({ts:at(10,20), author:'細川',   route:'1', cat:'trial',  customer:'宮地様', detail:'ナビ通りでOK／表札あり', memo:'手渡し済み。今後のことは電話するそうです', needsAction:true}),
+    mk({ts:at(10,22), author:'Homa',   route:'4', cat:'cancel', customer:'池田琴美様', detail:'明日で終了（昼夜）', memo:'明日お金を払いたいとのこと', needsAction:true}),
+    mk({ts:at(11,21), author:'マサカズ', route:'2', cat:'done', detail:'配達完了'}),
+    mk({ts:at(11,35), author:'70',     route:'3', cat:'done', detail:'配達完了'}),
+    mk({ts:at(12,10), author:'細川',   route:'1', cat:'other', detail:'車両の不具合', memo:'ソリオ停車中はオイルランプ点きっぱなし。明日から三連休ですが本日中の対応は必要ですか？', needsAction:true}),
+    mk({ts:at(13,12), author:'原田',   route:'2', cat:'cancel', customer:'斎田様', detail:'来週から中止', needsAction:true, done:true, doneBy:'原田', doneAt:at(13,20)}),
+    mk({ts:at(13,36), author:'細川',   route:'1', cat:'money',  customer:'宍戸様・斎藤様', detail:'集金済み（消し込み済み）', needsAction:true}),
+    mk({ts:at(15,27), author:'70',     route:'3', cat:'change', customer:'畝行様', detail:'来週月曜：帰りが遅いので保冷箱希望', needsAction:true}),
+    mk({ts:at(15,59), author:'Homa',   route:'4', cat:'money',  customer:'栗田様', detail:'手渡し済み・QR送信お願いします', needsAction:true}),
+    mk({ts:at(16,15), author:'Homa',   route:'4', cat:'done',  detail:'配達完了', memo:'このあと前田自動車に行きます'}),
+  ];
+}
+function seedShifts(){
+  const s={}; const base=new Date();
+  const add=(offset,names)=>{ const d=new Date(base); d.setDate(d.getDate()+offset);
+    s[dateKey(d.getTime())]=Object.fromEntries(names.map(n=>[n,true])); };
+  add(3,['細川','マサカズ']); add(4,['細川','70','Homa']); add(6,['マサカズ','Homa']);
+  return s;
+}
+
+/* ---------------- データ層（デモ / Firebase 共通インターフェース） ---------------- */
+class DemoStore{
+  constructor(){ this.reports=seedReports(); this.shifts=seedShifts(); this.accounts={};
+    this.images={}; this._id=0; this._imgId=0; }
+  async addImage(data){ const id='img'+(++this._imgId); this.images[id]=data; return id; }
+  async getImage(id){ return this.images[id]||null; }
+  deleteImage(id){ delete this.images[id]; }
+  async init(onReports,onShifts){ this.onR=onReports; this.onS=onShifts;
+    onReports(this.reports); onShifts(this.shifts); }
+  async getAccount(name){ return this.accounts[name]||null; }
+  async createAccount(a){
+    if(this.accounts[a.name]) throw new Error('その名前はすでに登録されています');
+    this.accounts[a.name]=a; }
+  addReport(r){ r.id='d'+(++this._id); this.reports.push(r); this.onR(this.reports); }
+  updateReport(id,patch){ const r=this.reports.find(x=>x.id===id);
+    if(r){ Object.assign(r,patch); this.onR(this.reports); } }
+  deleteReport(id){ this.reports=this.reports.filter(x=>x.id!==id); this.onR(this.reports); }
+  setShift(date,name,val){ const d=this.shifts[date]||(this.shifts[date]={});
+    if(val) d[name]=true; else delete d[name]; this.onS(this.shifts); }
+}
+
+function loadScript(src){ return new Promise((res,rej)=>{
+  const s=document.createElement('script'); s.src=src; s.onload=res;
+  s.onerror=()=>rej(new Error('読み込み失敗: '+src)); document.head.appendChild(s); }); }
+
+class FirebaseStore{
+  async init(onReports,onShifts){
+    const V='10.12.2';
+    await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
+    firebase.initializeApp(FIREBASE_CONFIG);
+    this.db = firebase.firestore();
+    this.db.collection('reports').orderBy('ts','asc').limitToLast(400)
+      .onSnapshot(snap=>{ onReports(snap.docs.map(d=>({id:d.id, ...d.data()}))); },
+        err=>toast('通信エラー：'+err.message));
+    this.db.collection('shifts')
+      .onSnapshot(snap=>{ const m={};
+        snap.docs.forEach(d=>{ const v=d.data();
+          if(v.available){ (m[v.date]=m[v.date]||{})[v.name]=true; } });
+        onShifts(m); }, err=>toast('通信エラー：'+err.message));
+  }
+  addReport(r){ this.db.collection('reports').add(r).catch(e=>toast('送信エラー：'+e.message)); }
+  updateReport(id,patch){ this.db.collection('reports').doc(id).update(patch)
+    .catch(e=>toast('更新エラー：'+e.message)); }
+  deleteReport(id){ this.db.collection('reports').doc(id).delete()
+    .catch(e=>toast('削除エラー：'+e.message)); }
+  async addImage(data){
+    const ref=await this.db.collection('images').add({data, ts:Date.now()});
+    return ref.id; }
+  async getImage(id){
+    const d=await this.db.collection('images').doc(id).get();
+    return d.exists ? d.data().data : null; }
+  deleteImage(id){ this.db.collection('images').doc(id).delete().catch(()=>{}); }
+  async getAccount(name){
+    const d=await this.db.collection('accounts').doc(name).get();
+    return d.exists ? d.data() : null; }
+  async createAccount(a){
+    const ref=this.db.collection('accounts').doc(a.name);
+    const d=await ref.get();
+    if(d.exists) throw new Error('その名前はすでに登録されています');
+    await ref.set(a); }
+  setShift(date,name,val){ const ref=this.db.collection('shifts').doc(date+'_'+name);
+    (val ? ref.set({date,name,available:true}) : ref.delete())
+      .catch(e=>toast('更新エラー：'+e.message)); }
+}
+
+const store = MODE==='online' ? new FirebaseStore() : new DemoStore();
+</script>
+<script>
+/* ---------------- タイムライン ---------------- */
+function buildFilterChips(){
+  const r=$('#chips-route');
+  r.innerHTML = ['all',...ROUTES].map(v=>
+    `<button class="chip${state.fRoute===v?' on':''}" data-v="${v}">${v==='all'?'全ルート':routeLabel(v)}</button>`).join('');
+  r.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ state.fRoute=b.dataset.v; buildFilterChips(); renderTimeline(); });
+  const c=$('#chips-cat');
+  c.innerHTML = ['all',...Object.keys(CATS)].map(v=>
+    `<button class="chip${state.fCat===v?' on':''}" data-v="${v}">${v==='all'?'すべて':CATS[v].icon+' '+CATS[v].label}</button>`).join('');
+  c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ state.fCat=b.dataset.v; buildFilterChips(); renderTimeline(); });
+}
+
+function reportCard(r, forTodo){
+  const cat = CATS[r.cat] || CATS.other;
+  const rc = ROUTE_COLORS[r.route] || 'var(--grey)';
+  const status = r.needsAction
+    ? (r.done
+        ? `<span class="st st-done">処理済み ✓ ${esc(r.doneBy||'')}</span>`
+        : `<span class="st st-open">未処理</span>`)
+    : '';
+  // 送信取り消し：自分の報告（管理者は全員の報告）に表示
+  const canRetract = state.user && (r.author===state.user.name || isAdmin());
+  const retract = canRetract ? `<button class="retract" data-id="${r.id}">取消</button>` : '';
+  return `
+    <div class="card" style="border-left-color:${cat.color}">
+      <div class="card-top">
+        <span class="badge-route" style="background:${rc}">${esc(routeLabel(r.route))}</span>
+        <span class="badge-cat" style="color:${cat.color}">${cat.icon} ${cat.label}</span>
+        <span class="card-time">${fmtTime(r.ts)}</span>
+      </div>
+      <div class="card-main">${r.customer?`<b>${esc(r.customer)}</b>　`:''}${esc(r.detail||'')}</div>
+      ${r.memo?`<div class="card-memo">${esc(r.memo)}</div>`:''}
+      ${r.photoThumb?`<img class="card-photo" src="${r.photoThumb}" data-photo="${esc(r.photoId||'')}" alt="写真">`:''}
+      <div class="card-foot"><span class="card-author">👤 ${esc(r.author)}</span>${retract}${status}</div>
+    </div>`;
+}
+
+/* 写真タップ → 拡大表示（拡大用の画像は必要になったときだけ読み込む） */
+function attachPhotoHandlers(root){
+  root.querySelectorAll('.card-photo').forEach(im=>im.onclick=async ()=>{
+    const v=$('#photo-viewer'), big=v.querySelector('img');
+    big.src=im.src;            // まずサムネを表示
+    v.hidden=false;
+    const id=im.dataset.photo;
+    if(id){ try{ const data=await store.getImage(id); if(data) big.src=data; }catch(e){} }
+  });
+}
+
+function renderTimeline(){
+  const el=$('#timeline');
+  const list = state.reports.filter(r=>
+    (state.fRoute==='all' || r.route===state.fRoute) &&
+    (state.fCat==='all'   || r.cat===state.fCat));
+  if(!list.length){ el.innerHTML='<div class="empty">まだ報告がありません。<br>「➕ 報告する」から送ってみてください。</div>'; return; }
+  let html='', lastDay='';
+  for(const r of list){
+    const dk=dateKey(r.ts);
+    if(dk!==lastDay){ html+=`<div class="date-sep"><span>${fmtDateLabel(dk)}</span></div>`; lastDay=dk; }
+    html+=reportCard(r);
+  }
+  el.innerHTML=html;
+  // 送信取り消し（押し間違い防止のため2回タップ）
+  el.querySelectorAll('.retract').forEach(b=>b.onclick=()=>{
+    if(!b.dataset.arm){
+      b.dataset.arm='1'; b.textContent='本当に取消？'; b.classList.add('arm');
+      setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent='取消'; b.classList.remove('arm'); } },3000);
+      return;
+    }
+    const rep=state.reports.find(x=>x.id===b.dataset.id);
+    store.deleteReport(b.dataset.id);
+    if(rep && rep.photoId) store.deleteImage(rep.photoId);
+    toast('送信を取り消しました');
+  });
+  attachPhotoHandlers(el);
+  // タイムライン表示中なら、一番新しい報告が見えるように下までスクロール
+  if(!$('#view-timeline').hidden)
+    requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
+}
+
+/* ---------------- 要対応リスト ---------------- */
+function renderTodo(){
+  const listEl=$('#todo-list');
+  const open = state.todoTab==='open';
+  const items = state.reports.filter(r=>r.needsAction && (open? !r.done : r.done));
+  const sorted=[...items].sort((a,b)=> open ? a.ts-b.ts : (b.doneAt||b.ts)-(a.doneAt||a.ts));
+  if(!sorted.length){
+    listEl.innerHTML=`<div class="empty">${open?'未処理の項目はありません 🎉':'処理済みの項目はまだありません'}</div>`;
+    return;
+  }
+  listEl.innerHTML = sorted.map(r=>{
+    const cat=CATS[r.cat]||CATS.other;
+    const doneNote = r.done
+      ? `<div class="todo-donenote">✓ ${esc(r.doneBy||'')} が処理（${fmtTime(r.doneAt||r.ts)}）</div>` : '';
+    return `
+      <div class="todo-card${r.done?' is-done':''}">
+        <div class="todo-body">
+          <div class="card-top">
+            <span class="badge-route" style="background:${ROUTE_COLORS[r.route]||'var(--grey)'}">${esc(routeLabel(r.route))}</span>
+            <span class="badge-cat" style="color:${cat.color}">${cat.icon} ${cat.label}</span>
+            <span class="card-time">${fmtDateLabel(dateKey(r.ts))} ${fmtTime(r.ts)}</span>
+          </div>
+          <div class="card-main">${r.customer?`<b>${esc(r.customer)}</b>　`:''}${esc(r.detail||'')}</div>
+          ${r.memo?`<div class="card-memo">${esc(r.memo)}</div>`:''}
+          ${r.photoThumb?`<img class="card-photo" src="${r.photoThumb}" data-photo="${esc(r.photoId||'')}" alt="写真">`:''}
+          <div class="card-author" style="margin-top:4px">👤 ${esc(r.author)}</div>
+          ${doneNote}
+        </div>
+        ${!isAdmin() ? '' : r.done
+          ? `<div class="todo-actions">
+               <button class="todo-check undo" data-id="${r.id}">戻す</button>
+               <button class="todo-del" data-id="${r.id}">削除</button>
+             </div>`
+          : `<button class="todo-check" data-id="${r.id}">済</button>`}
+      </div>`;
+  }).join('');
+  listEl.querySelectorAll('.todo-check').forEach(b=>b.onclick=()=>{
+    const r=state.reports.find(x=>x.id===b.dataset.id); if(!r) return;
+    if(r.done){ store.updateReport(r.id,{done:false,doneBy:'',doneAt:0}); toast('未処理に戻しました'); }
+    else{ store.updateReport(r.id,{done:true,doneBy:state.user.name,doneAt:Date.now()}); toast('処理済みにしました ✓'); }
+  });
+  // 削除は押し間違い防止のため2回タップ
+  listEl.querySelectorAll('.todo-del').forEach(b=>b.onclick=()=>{
+    if(!b.dataset.arm){
+      b.dataset.arm='1'; b.textContent='本当に削除？';
+      setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent='削除'; } },3000);
+      return;
+    }
+    const rep=state.reports.find(x=>x.id===b.dataset.id);
+    store.deleteReport(b.dataset.id);
+    if(rep && rep.photoId) store.deleteImage(rep.photoId);
+    toast('削除しました（タイムラインからも消えます）');
+  });
+  attachPhotoHandlers(listEl);
+}
+
+function updateBadge(){
+  const n=state.reports.filter(r=>r.needsAction && !r.done).length;
+  const b=$('#todo-badge'); b.hidden=(n===0); b.textContent=n;
+}
+
+/* ---------------- シフトカレンダー（21日〜翌月20日の期間制） ---------------- */
+function periodInfo(){
+  const {y,m}=state.period;
+  const ny = m===11 ? y+1 : y, nm = (m+1)%12;
+  return { y, m, ny, nm,
+    label:`${m+1}/21 〜 ${nm+1}/20 分`,
+    deadline:new Date(y,m,8) };
+}
+function periodDates(){
+  const p=periodInfo(); const out=[];
+  const lastDay=new Date(p.y,p.m+1,0).getDate();
+  for(let d=21;d<=lastDay;d++) out.push(`${p.y}-${pad2(p.m+1)}-${pad2(d)}`);
+  for(let d=1;d<=20;d++) out.push(`${p.ny}-${pad2(p.nm+1)}-${pad2(d)}`);
+  return out;
+}
+function myCurrentDates(){
+  return periodDates().filter(k=>(state.shifts[k]||{})[state.user.name]);
+}
+/* 期間が変わったら、選択状態を「自分の提出済みの日」で初期化 */
+function ensureShiftSel(){
+  const pk=state.period.y+'-'+state.period.m+'-'+state.user.name;
+  if(state.shiftSelPeriod!==pk){
+    state.shiftSelPeriod=pk;
+    state.shiftSel=new Set(myCurrentDates());
+  }
+}
+const adminView = () => isAdmin() && state.shiftMode==='view';
+
+function monthGridHTML(y,m,from,to){
+  const todayK=dateKey(Date.now());
+  const av=adminView();
+  let html=`<div class="cal-month-title">${y}年${m+1}月</div><div class="cal-grid">`;
+  html+=WDAYS.map((w,i)=>`<div class="cal-wd${i===0?' sun':i===6?' sat':''}">${w}</div>`).join('');
+  const off=new Date(y,m,from).getDay();
+  for(let i=0;i<off;i++) html+='<div class="cal-cell blank"></div>';
+  for(let d=from;d<=to;d++){
+    const key=`${y}-${pad2(m+1)}-${pad2(d)}`;
+    const cnt=Object.keys(state.shifts[key]||{}).length;
+    const selected=state.shiftSel && state.shiftSel.has(key);
+    const cls=(key===todayK?' today':'')
+      +(av && key===state.selDate?' sel':'')
+      +(!av && selected?' mysel':'');
+    html+=`<button class="cal-cell${cls}" data-key="${key}">
+      <span class="dnum">${d}</span>
+      ${!av && selected?'<span class="cal-mine">出勤◯</span>':''}
+      ${av && cnt?`<span class="cal-cnt">${cnt}人</span>`:''}
+    </button>`;
+  }
+  return html+'</div>';
+}
+
+function renderShift(){
+  ensureShiftSel();
+  const p=periodInfo();
+  $('#cal-label').textContent=p.label;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const diff=Math.round((p.deadline-today)/86400000);
+  const dlText=`${p.deadline.getMonth()+1}月8日`;
+  const note=$('#deadline-note');
+  if(diff>0){ note.textContent=`⏰ 提出締切：${dlText}（あと${diff}日）`; note.className='deadline ok'; }
+  else if(diff===0){ note.textContent=`⏰ 提出締切：${dlText}（今日まで！）`; note.className='deadline warn'; }
+  else{ note.textContent=`⏰ 提出締切：${dlText}（締切を過ぎています。追加・変更はお早めに）`; note.className='deadline warn'; }
+  const av=adminView();
+  $('#shift-help').textContent = av
+    ? '日付をタップすると、その日に出勤できる人の一覧が見られます。数字は提出人数です。'
+    : '出勤できる日をタップして選択（複数OK）→ 最後に「送信して保存」を押してください。毎月8日までに「21日〜翌月20日」の分を提出します。';
+  const lastDay=new Date(p.y,p.m+1,0).getDate();
+  $('#cal-container').innerHTML =
+    monthGridHTML(p.y,p.m,21,lastDay) + monthGridHTML(p.ny,p.nm,1,20);
+  $('#cal-container').querySelectorAll('.cal-cell:not(.blank)').forEach(c=>c.onclick=()=>{
+    const key=c.dataset.key;
+    if(adminView()){ state.selDate=key; }
+    else{ state.shiftSel.has(key) ? state.shiftSel.delete(key) : state.shiftSel.add(key); }
+    renderShift();
+  });
+  $('#shift-submit-bar').hidden=av;
+  if(!av) $('#shift-sel-count').textContent=`選択中：${state.shiftSel.size}日（出勤できる日）`;
+  renderDayDetail();
+}
+
+function renderDayDetail(){
+  const el=$('#day-detail');
+  if(!adminView() || !state.selDate){ el.hidden=true; return; }
+  el.hidden=false;
+  const members=Object.keys(state.shifts[state.selDate]||{});
+  el.innerHTML=`
+    <h3>📅 ${fmtDateLabel(state.selDate)} に出勤できる人（${members.length}人）</h3>
+    <div>${members.length
+      ? members.map(n=>`<span class="member-tag">${esc(n)}</span>`).join('')
+      : '<span class="note">まだ誰も提出していません</span>'}</div>`;
+}
+
+function sendShift(){
+  ensureShiftSel();
+  const cur=new Set(myCurrentDates());
+  let changed=0;
+  for(const k of state.shiftSel) if(!cur.has(k)){ store.setShift(k,state.user.name,true); changed++; }
+  for(const k of cur) if(!state.shiftSel.has(k)){ store.setShift(k,state.user.name,false); changed++; }
+  toast(changed ? `シフトを送信しました（出勤可 ${state.shiftSel.size}日）` : '変更はありません');
+}
+</script>
+<script>
+/* ---------------- 報告フォーム ---------------- */
+const FORM_DEFS = {
+  absent:{ customer:true,
+    selects:[{id:'f-d1',label:'対応',opts:['保冷箱対応','持ち戻り','再配達します']}],
+    memoPh:'例：施錠・声かけしたが応答なし　など' },
+  cancel:{ customer:true,
+    selects:[{id:'f-d1',label:'期間',opts:['明日のみキャンセル','指定日のみキャンセル','本日で終了','来週から中止','しばらく中止']},
+             {id:'f-d2',label:'対象',opts:['昼夜','昼のみ','夜のみ']}],
+    date:true,
+    memoPh:'例：明日お金を払いたいとのこと　など' },
+  change:{ customer:true,
+    text:{id:'f-d1',label:'変更・依頼の内容',ph:'例：来週月曜は帰りが遅いので保冷箱でお願いしたい'},
+    memoPh:'補足があれば' },
+  money:{ customer:true,
+    selects:[{id:'f-d1',label:'状況',opts:['集金済み（消し込み済み）','集金済み（未消し込み）','お客様が支払い希望','請求書渡し済み','QR送信お願いします']}],
+    memoPh:'補足があれば' },
+  trial:{ customer:true,
+    selects:[{id:'f-d1',label:'ナビ',opts:['ナビ通りでOK','ナビと違う（メモに記入）']},
+             {id:'f-d2',label:'表札',opts:['表札あり','表札なし']}],
+    memoPh:'在宅時間・今後の予定など' },
+  done:{ customer:false, memoPh:'補足があれば（例：このあと給油に行きます）' },
+  other:{ customer:false,
+    text:{id:'f-d1',label:'件名',ph:'例：弁当が足りない／オイルランプ点灯'},
+    memoPh:'詳しい内容（何個足りない・どの車両など）', memoReq:true },
+};
+
+function buildCatGrid(){
+  $('#cat-grid').innerHTML = Object.entries(CATS).map(([k,c])=>
+    `<button type="button" class="cat-btn${state.composeCat===k?' on':''}" data-v="${k}"
+       style="border-top-color:${c.color}"><span class="ci">${c.icon}</span>${c.label}</button>`).join('');
+  $$('#cat-grid .cat-btn').forEach(b=>b.onclick=()=>selectCat(b.dataset.v));
+}
+
+function selectCat(cat){
+  state.composeCat=cat; buildCatGrid();
+  const def=FORM_DEFS[cat], c=CATS[cat];
+  $('#form-cat-label').textContent=c.icon+' '+c.label;
+  let html=`<label>ルート</label><select id="f-route">${
+    ROUTES.map(r=>`<option value="${r}"${r===state.user.route?' selected':''}>${routeLabel(r)}</option>`).join('')}</select>`;
+  if(def.customer) html+=`<label>お客様のお名前</label><input id="f-customer" autocomplete="off">`;
+  (def.selects||[]).forEach(s=>{
+    html+=`<label>${s.label}</label><select id="${s.id}">${s.opts.map(o=>`<option>${o}</option>`).join('')}</select>`; });
+  if(def.date) html+=`<label>対象日・開始日（わかれば）</label><input type="date" id="f-date">`;
+  if(def.text) html+=`<label>${def.text.label}</label><input id="${def.text.id}" placeholder="${def.text.ph}" autocomplete="off">`;
+  html+=`<label>メモ${def.memoReq?'':'（任意）'}</label><textarea id="f-memo" rows="2" placeholder="${def.memoPh}"></textarea>`;
+  html+=`<label>写真（任意）</label><input type="file" id="f-photo" accept="image/*">
+    <div id="photo-preview" hidden></div>`;
+  $('#form-fields').innerHTML=html;
+  state.pendingPhoto=null;
+  $('#f-photo').onchange=async e=>{
+    const f=e.target.files && e.target.files[0];
+    if(!f) return;
+    try{
+      state.pendingPhoto=await processPhoto(f);
+      const pv=$('#photo-preview');
+      pv.hidden=false;
+      pv.innerHTML=`<img src="${state.pendingPhoto.thumb}" alt="プレビュー">
+        <button type="button" id="photo-remove">✕ 削除</button>`;
+      $('#photo-remove').onclick=()=>{ state.pendingPhoto=null; pv.hidden=true; pv.innerHTML=''; $('#f-photo').value=''; };
+    }catch(err){ toast('画像を読み込めませんでした'); $('#f-photo').value=''; }
+  };
+  $('#form-action-note').textContent = cat==='done'
+    ? '' : '※ この報告は自動で「要対応リスト」に入ります';
+  $('#report-form').hidden=false;
+  $('#report-form').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function fmtJPDate(v){ if(!v) return ''; const [y,m,d]=v.split('-'); return Number(m)+'/'+Number(d); }
+
+/* 写真をスマホでも軽い形に自動圧縮（サムネ＋拡大用） */
+async function processPhoto(file){
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=url; });
+  const make=(maxW,q)=>{
+    const sc=Math.min(1, maxW/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');
+    c.width=Math.max(1,Math.round(img.width*sc));
+    c.height=Math.max(1,Math.round(img.height*sc));
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',q);
+  };
+  let full=make(1080,.6);
+  if(full.length>700000) full=make(800,.5);
+  if(full.length>700000) full=make(640,.4);
+  const thumb=make(240,.6);
+  URL.revokeObjectURL(url);
+  return {thumb, full};
+}
+
+async function submitReport(e){
+  e.preventDefault();
+  const cat=state.composeCat; if(!cat) return;
+  const def=FORM_DEFS[cat];
+  const val=id=>{ const el=document.getElementById(id); return el?el.value.trim():''; };
+  const customer=val('f-customer');
+  if(def.customer && !customer){ toast('お客様のお名前を入力してください'); return; }
+  if(def.text && def.memoReq===undefined && cat==='change' && !val('f-d1')){ toast('変更・依頼の内容を入力してください'); return; }
+  if(cat==='other' && !val('f-d1')){ toast('件名を入力してください'); return; }
+  const memo=val('f-memo');
+  if(def.memoReq && !memo){ toast('内容を入力してください'); return; }
+  let detail='';
+  if(cat==='absent') detail=val('f-d1');
+  else if(cat==='cancel'){
+    detail=val('f-d1'); const d=fmtJPDate(val('f-date'));
+    if(d) detail+=`（${d}〜）`; detail+=`（${val('f-d2')}）`;
+  }
+  else if(cat==='change') detail=val('f-d1');
+  else if(cat==='money') detail=val('f-d1');
+  else if(cat==='trial') detail=val('f-d1')+'／'+val('f-d2');
+  else if(cat==='done') detail='配達完了';
+  else if(cat==='other') detail=val('f-d1');
+  let photoThumb='', photoId='';
+  if(state.pendingPhoto){
+    try{ photoId=await store.addImage(state.pendingPhoto.full);
+      photoThumb=state.pendingPhoto.thumb; }
+    catch(err){ toast('画像の送信に失敗しました：'+(err.message||'')); return; }
+  }
+  store.addReport({ ts:Date.now(), author:state.user.name, route:val('f-route'),
+    cat, customer, detail, memo, photoThumb, photoId,
+    needsAction:cat!=='done', done:false, doneBy:'', doneAt:0 });
+  toast('報告を送信しました ✓');
+  state.pendingPhoto=null;
+  state.composeCat=null; $('#report-form').hidden=true; buildCatGrid();
+  showView('timeline');
+}
+
+/* ---------------- 画面切り替え ---------------- */
+function showView(name){
+  ['timeline','compose','todo','shift'].forEach(v=>$('#view-'+v).hidden=(v!==name));
+  $$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===name));
+  if(name==='timeline') requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
+  else window.scrollTo(0,0);
+  if(name==='shift') renderShift();
+  if(name==='todo') renderTodo();
+}
+
+/* ---------------- データ更新コールバック ---------------- */
+function reportsUpdated(list){
+  state.reports=[...list].sort((a,b)=>a.ts-b.ts);
+  if(state.user){ renderTimeline(); renderTodo(); updateBadge(); }
+}
+function shiftsUpdated(map){ state.shifts=map;
+  if(state.user && !$('#view-shift').hidden) renderShift(); }
+
+/* ---------------- ログイン ---------------- */
+function segInit(id){
+  const seg=document.getElementById(id);
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); });
+}
+const segVal = id => document.querySelector('#'+id+' button.on').dataset.v;
+
+function showApp(){
+  $('#login').hidden=true; $('#app').hidden=false;
+  $('#btn-user').textContent='👤 '+state.user.name+(isAdmin()?'（管理者）':'');
+  $('#mode-badge').textContent = MODE==='online' ? 'オンライン' : 'デモ体験版';
+  $('#shift-mode').hidden=!isAdmin();
+  state.shiftMode='edit'; state.shiftSelPeriod=null; state.selDate=null;
+  $$('#shift-mode button').forEach(b=>b.classList.toggle('on',b.dataset.v==='edit'));
+  $('#todo-note').textContent = isAdmin()
+    ? '配達完了以外の報告は自動でここに入ります。エクセルに反映したら「済」を押してください。'
+    : '配達完了以外の報告は自動でここに入ります。「済」の処理（消し込み）は管理者が行います。';
+  buildFilterChips(); buildCatGrid();
+  $('#todo-seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    $('#todo-seg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); state.todoTab=b.dataset.v; renderTodo(); });
+  renderTimeline(); renderTodo(); updateBadge();
+}
+
+function init(){
+  segInit('login-role'); segInit('login-route');
+  $('#mode-note').textContent = MODE==='online'
+    ? 'オンライン版：報告はメンバー全員にリアルタイムで共有されます。'
+    : '※いまはデモ体験版です。データはこの端末の中だけで、他の人には共有されません。';
+  if(MODE==='demo') $('#mode-note').textContent += '（新規登録してお試しください。デモ版の管理者コードは 1234）';
+  // ログイン／新規登録タブ
+  const loginTab = () => segVal('login-tab');
+  const refreshLoginUI = () => {
+    const reg = loginTab()==='register';
+    $('#reg-wrap').hidden = !reg;
+    $('#admin-pin-wrap').hidden = !(reg && segVal('login-role')==='admin');
+    $('#login-go').textContent = reg ? '登録してはじめる' : 'ログイン';
+  };
+  segInit('login-tab');
+  $$('#login-tab button').forEach(b=>b.addEventListener('click',refreshLoginUI));
+  $$('#login-role button').forEach(b=>b.addEventListener('click',refreshLoginUI));
+  // 保存されたログイン状態があれば復元
+  const saved=safeStorage.get('mgk_user');
+  if(saved){ try{ state.user=JSON.parse(saved); }catch(e){} }
+  if(state.user && state.user.route==='他') state.user.route='厨房';
+  if(state.user && state.user.auth && state.user.name){
+    $('#login-name').value=state.user.name; showApp();
+  }else{
+    state.user=null;   // 旧形式の保存データは無効化（アカウント登録が必要）
+  }
+  $('#login-go').onclick=async ()=>{
+    const name=$('#login-name').value.trim();
+    const pin=$('#login-pw').value.trim();
+    if(!name){ toast('お名前を入力してください'); return; }
+    if(!/^\d{4,8}$/.test(pin)){ toast('暗証番号は4〜8桁の数字にしてください'); return; }
+    const route=segVal('login-route');
+    try{
+      if(loginTab()==='register'){
+        const role=segVal('login-role');
+        if(role==='admin' && $('#login-pin').value!==ADMIN_CODE){
+          toast('管理者コードが違います'); return;
+        }
+        await store.createAccount({ name, pinHash:hashPin(name,pin), role, createdAt:Date.now() });
+        state.user={ name, role, route, auth:true };
+        toast('登録しました。ようこそ！');
+      }else{
+        const acc=await store.getAccount(name);
+        if(!acc){ toast('この名前の登録がありません。「新規登録」からどうぞ'); return; }
+        if(acc.pinHash!==hashPin(name,pin)){ toast('暗証番号が違います'); return; }
+        state.user={ name, role:acc.role, route, auth:true };
+      }
+      safeStorage.set('mgk_user', JSON.stringify(state.user));
+      $('#login-pw').value='';
+      showApp();
+    }catch(e){ toast(e.message||'エラーが発生しました'); }
+  };
+  $('#btn-user').onclick=()=>{
+    state.user=null; safeStorage.del('mgk_user');
+    $('#app').hidden=true; $('#login').hidden=false;
+    toast('ログアウトしました。ログインし直してください');
+  };
+  // アプリ起動と同時にデータ接続（ログイン前でも接続だけ済ませておく）
+  store.init(reportsUpdated, shiftsUpdated)
+    .catch(e=>toast('接続エラー：'+e.message));
+  $$('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+  $('#cal-prev').onclick=()=>{ const p=state.period; p.m--; if(p.m<0){p.m=11;p.y--;}
+    state.selDate=null; renderShift(); };
+  $('#cal-next').onclick=()=>{ const p=state.period; p.m++; if(p.m>11){p.m=0;p.y++;}
+    state.selDate=null; renderShift(); };
+  $('#btn-cal-today').onclick=()=>{ state.period=initPeriod(); state.selDate=null; renderShift(); };
+  $('#btn-shift-send').onclick=sendShift;
+  $$('#shift-mode button').forEach(b=>b.onclick=()=>{
+    $$('#shift-mode button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); state.shiftMode=b.dataset.v; state.selDate=null; renderShift(); });
+  $('#report-form').onsubmit=submitReport;
+  $('#btn-back-cat').onclick=()=>{ state.composeCat=null; state.pendingPhoto=null;
+    $('#report-form').hidden=true; buildCatGrid(); };
+  $('#photo-viewer').onclick=()=>{ $('#photo-viewer').hidden=true; };
+}
+init();
+</script>
+</body>
+</html>

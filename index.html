@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Magokoro Haitatsu Note",
+  "schemaVersion": 1,
+  "description": "まごころ弁当の配達報告・要対応チェックリスト・シフト提出アプリ(デモモード)。Firebase設定を貼るとチーム全員でリアルタイム共有可能。",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -157,6 +166,68 @@ nav button.on{color:var(--primary)}
 .member-tag{display:inline-block;background:#e5f5ec;color:var(--green);font-weight:700;
   font-size:13px;padding:3px 12px;border-radius:99px;margin:2px 3px 2px 0}
 
+/* ---------- シフト日別一覧（管理者） ---------- */
+.daylist{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.daylist-row{background:#fff;border-radius:12px;padding:9px 12px;box-shadow:0 1px 3px rgba(60,40,10,.06);
+  display:flex;align-items:flex-start;gap:10px;border-left:4px solid var(--line)}
+.daylist-row.has{border-left-color:var(--green)}
+.daylist-row.today{outline:2px solid var(--primary);outline-offset:-1px}
+.daylist-date{flex:0 0 66px;font-weight:800;font-size:14px;padding-top:2px}
+.daylist-date .wd{font-size:11px;font-weight:700;margin-left:2px;color:var(--sub)}
+.daylist-date .wd.sun{color:var(--red)} .daylist-date .wd.sat{color:var(--blue)}
+.daylist-members{flex:1;min-width:0}
+.daylist-cnt{flex:0 0 auto;font-size:12px;font-weight:800;color:var(--green);padding-top:3px}
+.daylist-cnt.zero{color:var(--sub)}
+
+/* ---------- 検索 ---------- */
+.search-wrap{position:relative;margin:0 0 6px}
+.search-wrap input{padding:9px 34px 9px 34px;font-size:15px;border-radius:99px;background:#fff}
+.search-wrap .s-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px}
+.search-wrap .s-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  color:var(--sub);font-size:18px;padding:2px 8px;display:none}
+.search-wrap.active .s-clear{display:block}
+.search-count{font-size:12px;color:var(--sub);font-weight:600;margin:0 2px 6px}
+.adv-bar{display:flex;align-items:center;gap:8px;margin:2px 0 4px}
+.adv-bar #adv-btn{font-size:12.5px;font-weight:700;color:var(--sub);background:#fff;
+  border:1.5px solid var(--line);border-radius:99px;padding:5px 12px}
+.adv-bar #adv-btn.on{color:var(--primary);border-color:var(--primary)}
+.adv-bar #adv-clear{font-size:12px;font-weight:700;color:var(--red);
+  border:1.5px solid var(--red);border-radius:99px;padding:4px 11px;margin-left:auto}
+#adv-panel{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:4px 12px 12px;margin:2px 0 6px}
+.adv-row{margin-top:10px}
+.adv-row>label{margin:0 0 5px}
+.adv-date{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.adv-date .chip{flex:0 0 auto}
+.adv-date input[type=date]{flex:1;min-width:130px}
+
+/* ---------- タイムカード（打刻） ---------- */
+.tc-card{background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 2px 8px rgba(60,40,10,.08);
+  text-align:center;margin-bottom:14px}
+.tc-date{font-size:13px;color:var(--sub);font-weight:700}
+.tc-status{font-size:20px;font-weight:800;margin:8px 0 4px}
+.tc-status.working{color:var(--green)} .tc-status.done{color:var(--sub)} .tc-status.none{color:var(--text)}
+.tc-times{font-size:14px;color:var(--sub);font-weight:600;margin-bottom:4px}
+.tc-worked{font-size:14px;font-weight:800;color:var(--primary)}
+.tc-btns{display:flex;gap:10px;margin-top:14px}
+.tc-btn{flex:1;padding:16px 0;border-radius:14px;font-weight:800;font-size:17px;color:#fff}
+.tc-in{background:var(--green)} .tc-in:active{background:#178047}
+.tc-out{background:var(--primary)} .tc-out:active{background:var(--primary-dark)}
+.tc-btn:disabled{background:#e2ddd4;color:#a9a297}
+.tc-total{background:#fff7ef;border:1.5px solid #f3d9bd;border-radius:12px;padding:11px 14px;
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tc-total .lbl{font-size:13px;font-weight:700;color:var(--sub)}
+.tc-total .val{font-size:18px;font-weight:900;color:var(--primary)}
+.tc-hist{display:flex;flex-direction:column;gap:6px}
+.tc-hist-row{background:#fff;border-radius:10px;padding:8px 12px;box-shadow:0 1px 2px rgba(60,40,10,.06);
+  display:flex;align-items:center;font-size:13.5px}
+.tc-hist-row .d{font-weight:700;flex:0 0 76px}
+.tc-hist-row .t{color:var(--sub);flex:1}
+.tc-hist-row .w{font-weight:800;color:var(--primary)}
+.tc-person{background:#fff;border-radius:12px;padding:10px 13px;margin-bottom:8px;box-shadow:0 1px 3px rgba(60,40,10,.06)}
+.tc-person-head{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:15px}
+.tc-person-total{color:var(--primary);font-size:14px;font-weight:900}
+.tc-person-days{font-size:12.5px;color:var(--sub);margin-top:5px;line-height:1.7}
+
 /* ---------- 写真 ---------- */
 .card-photo{display:block;max-width:170px;max-height:170px;border-radius:10px;margin-top:7px;
   border:1px solid var(--line)}
@@ -228,9 +299,33 @@ input[type=file]{padding:8px;background:#faf8f5}
 
     <section id="view-timeline" class="view">
       <div class="filters">
+        <div class="search-wrap" id="search-wrap">
+          <span class="s-ico">🔍</span>
+          <input id="search-input" type="search" placeholder="お客様名・内容・名前で検索" autocomplete="off">
+          <button class="s-clear" id="search-clear" aria-label="クリア">✕</button>
+        </div>
         <div class="chips" id="chips-route"></div>
         <div class="chips" id="chips-cat"></div>
+        <div class="adv-bar">
+          <button id="adv-btn">🔎 詳しく絞り込む ▾</button>
+          <button id="adv-clear" hidden>× 絞り込み解除</button>
+        </div>
+        <div id="adv-panel" hidden>
+          <div class="adv-row">
+            <label>報告した人</label>
+            <select id="f-person"></select>
+          </div>
+          <div class="adv-row">
+            <label>日付でしぼる</label>
+            <div class="adv-date">
+              <button type="button" class="chip" data-quick="today">今日</button>
+              <button type="button" class="chip" data-quick="yesterday">昨日</button>
+              <input type="date" id="f-date-input">
+            </div>
+          </div>
+        </div>
       </div>
+      <div id="search-count" class="search-count" hidden></div>
       <div id="timeline" class="timeline"></div>
     </section>
 
@@ -279,12 +374,31 @@ input[type=file]{padding:8px;background:#faf8f5}
       <div id="day-detail" hidden></div>
     </section>
 
+    <section id="view-timecard" class="view" hidden>
+      <h2>タイムカード</h2>
+      <div class="seg" id="tc-mode" hidden style="margin-bottom:10px">
+        <button data-v="me" class="on">自分の打刻</button>
+        <button data-v="all">みんなの勤怠を見る</button>
+      </div>
+      <div id="tc-me"></div>
+      <div id="tc-all" hidden>
+        <div class="cal-head">
+          <button id="tc-prev">◀</button>
+          <div id="tc-label"></div>
+          <button id="tc-next">▶</button>
+        </div>
+        <button id="tc-today" class="today-btn">📍 今の期間に戻る</button>
+        <div id="tc-all-body"></div>
+      </div>
+    </section>
+
   </main>
   <nav>
     <button data-view="timeline" class="on"><span class="ni">💬</span>タイムライン</button>
-    <button data-view="compose"><span class="ni">➕</span>報告する</button>
+    <button data-view="compose"><span class="ni">➕</span>報告</button>
     <button data-view="todo"><span class="ni">✅</span>要対応<span class="nav-badge" id="todo-badge" hidden></span></button>
     <button data-view="shift"><span class="ni">📅</span>シフト</button>
+    <button data-view="timecard"><span class="ni">⏰</span>打刻</button>
   </nav>
 </div>
 
@@ -300,11 +414,18 @@ input[type=file]{padding:8px;background:#faf8f5}
      貼り付けてください（手順書「セットアップ手順.md」参照）。
      null のままだと「デモ体験版」として動きます（データ共有なし）。
    ===================================================================== */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAC4BDXgGjS_pvyhDvSQJtF7iiAqOsWjZk",
+  authDomain: "magokoro-be761.firebaseapp.com",
+  projectId: "magokoro-be761",
+  storageBucket: "magokoro-be761.firebasestorage.app",
+  messagingSenderId: "283232775392",
+  appId: "1:283232775392:web:9c4affe8623f17d59d3485"
+};
 
 /* ★ 管理者コード：ログイン時に「管理者」を選ぶには、このコードの入力が必要です。
    本番で使う前に必ず好きな数字に変更してください。 */
-const ADMIN_CODE = '1234';
+const ADMIN_CODE = '0217';
 
 /* 例：
 const FIREBASE_CONFIG = {
@@ -379,17 +500,27 @@ function initPeriod(){
   }
   return {y:t.getFullYear(), m:t.getMonth()};
 }
+/* 打刻の集計は「今日を含む期間」（21日以降=今月始まり、20日以前=先月始まり） */
+function initTcPeriod(){
+  const t=new Date();
+  if(t.getDate()>=21) return {y:t.getFullYear(), m:t.getMonth()};
+  const m=t.getMonth()-1;
+  return m<0 ? {y:t.getFullYear()-1, m:11} : {y:t.getFullYear(), m};
+}
 const state = {
   user:null,
   reports:[],           // {id,ts,author,route,cat,customer,detail,memo,needsAction,done,doneBy,doneAt}
   shifts:{},            // {'2026-07-21': {名前:true,...}}
-  fRoute:'all', fCat:'all',
+  timecards:{},         // {'2026-08-04': {名前:{inTime,outTime}}}
+  fRoute:'all', fCat:'all', fSearch:'', fPerson:'all', fDate:'',
   todoTab:'open',
   period:initPeriod(),  // {y,m} → m月21日〜翌月20日
   selDate:null,
   shiftMode:'edit',     // edit=自分の提出 / view=みんなの提出（管理者のみ）
   shiftSel:null,        // 選択中の日付Set
   shiftSelPeriod:null,
+  tcPeriod:initTcPeriod(),// 打刻の集計期間（今日を含む21日〜翌月20日）
+  tcMode:'me',          // me=自分 / all=みんな（管理者のみ）
   composeCat:null,
 };
 const isAdmin = () => state.user && state.user.role==='admin';
@@ -419,19 +550,36 @@ function seedShifts(){
   const s={}; const base=new Date();
   const add=(offset,names)=>{ const d=new Date(base); d.setDate(d.getDate()+offset);
     s[dateKey(d.getTime())]=Object.fromEntries(names.map(n=>[n,true])); };
-  add(3,['細川','マサカズ']); add(4,['細川','70','Homa']); add(6,['マサカズ','Homa']);
+  // シフト提出のデフォルト表示（次の期間＝21日以降）にサンプルが乗るように
+  add(18,['細川','マサカズ']); add(19,['細川','70','Homa']); add(21,['マサカズ','Homa']); add(24,['細川','70']);
   return s;
+}
+function seedTimecards(){
+  // 直近の平日っぽい日に、数人の打刻サンプルを入れておく（デモ表示用）
+  const tc={}; const base=new Date(); base.setSeconds(0,0);
+  const put=(offset,name,ih,im,oh,om)=>{
+    const d=new Date(base); d.setDate(d.getDate()+offset);
+    const key=dateKey(d.getTime());
+    const at=(h,m)=>{ const x=new Date(d); x.setHours(h,m,0,0); return x.getTime(); };
+    (tc[key]=tc[key]||{})[name]={inTime:at(ih,im), outTime:oh==null?0:at(oh,om)};
+  };
+  put(-2,'細川',8,55,16,20); put(-2,'マサカズ',9,0,16,40); put(-2,'Homa',8,50,16,10);
+  put(-1,'細川',8,58,16,30); put(-1,'70',9,5,16,50);
+  put(0,'細川',8,52,null);   // 今日：出勤中（退勤まだ）
+  return tc;
 }
 
 /* ---------------- データ層（デモ / Firebase 共通インターフェース） ---------------- */
 class DemoStore{
   constructor(){ this.reports=seedReports(); this.shifts=seedShifts(); this.accounts={};
-    this.images={}; this._id=0; this._imgId=0; }
+    this.images={}; this.timecards=seedTimecards(); this._id=0; this._imgId=0; }
   async addImage(data){ const id='img'+(++this._imgId); this.images[id]=data; return id; }
   async getImage(id){ return this.images[id]||null; }
   deleteImage(id){ delete this.images[id]; }
-  async init(onReports,onShifts){ this.onR=onReports; this.onS=onShifts;
-    onReports(this.reports); onShifts(this.shifts); }
+  async init(onReports,onShifts,onTimecards){ this.onR=onReports; this.onS=onShifts; this.onT=onTimecards;
+    onReports(this.reports); onShifts(this.shifts); onTimecards(this.timecards); }
+  setPunch(date,name,patch){ const d=this.timecards[date]||(this.timecards[date]={});
+    d[name]=Object.assign({}, d[name], patch); this.onT(this.timecards); }
   async getAccount(name){ return this.accounts[name]||null; }
   async createAccount(a){
     if(this.accounts[a.name]) throw new Error('その名前はすでに登録されています');
@@ -449,7 +597,7 @@ function loadScript(src){ return new Promise((res,rej)=>{
   s.onerror=()=>rej(new Error('読み込み失敗: '+src)); document.head.appendChild(s); }); }
 
 class FirebaseStore{
-  async init(onReports,onShifts){
+  async init(onReports,onShifts,onTimecards){
     const V='10.12.2';
     await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
     await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
@@ -463,7 +611,15 @@ class FirebaseStore{
         snap.docs.forEach(d=>{ const v=d.data();
           if(v.available){ (m[v.date]=m[v.date]||{})[v.name]=true; } });
         onShifts(m); }, err=>toast('通信エラー：'+err.message));
+    this.db.collection('timecards')
+      .onSnapshot(snap=>{ const m={};
+        snap.docs.forEach(d=>{ const v=d.data();
+          (m[v.date]=m[v.date]||{})[v.name]={inTime:v.inTime||0, outTime:v.outTime||0}; });
+        onTimecards(m); }, err=>toast('通信エラー：'+err.message));
   }
+  setPunch(date,name,patch){ const ref=this.db.collection('timecards').doc(date+'_'+name);
+    ref.set(Object.assign({date,name}, patch), {merge:true})
+      .catch(e=>toast('打刻エラー：'+e.message)); }
   addReport(r){ this.db.collection('reports').add(r).catch(e=>toast('送信エラー：'+e.message)); }
   updateReport(id,patch){ this.db.collection('reports').doc(id).update(patch)
     .catch(e=>toast('更新エラー：'+e.message)); }
@@ -540,12 +696,46 @@ function attachPhotoHandlers(root){
   });
 }
 
+function buildPersonOptions(){
+  const sel=$('#f-person');
+  const names=[...new Set(state.reports.map(r=>r.author))].sort();
+  sel.innerHTML = `<option value="all">すべての人</option>`
+    + names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  sel.value = names.includes(state.fPerson) ? state.fPerson : 'all';
+  if(sel.value==='all') state.fPerson='all';
+}
+function anyAdvActive(){ return state.fPerson!=='all' || !!state.fDate; }
+function updateAdvUI(){
+  $('#adv-btn').classList.toggle('on', anyAdvActive());
+  $('#adv-clear').hidden = !anyAdvActive();
+  $('#f-date-input').value = state.fDate || '';
+}
+
 function renderTimeline(){
   const el=$('#timeline');
+  const q=state.fSearch.trim().toLowerCase();
+  buildPersonOptions(); updateAdvUI();
   const list = state.reports.filter(r=>
-    (state.fRoute==='all' || r.route===state.fRoute) &&
-    (state.fCat==='all'   || r.cat===state.fCat));
-  if(!list.length){ el.innerHTML='<div class="empty">まだ報告がありません。<br>「➕ 報告する」から送ってみてください。</div>'; return; }
+    (state.fRoute==='all'  || r.route===state.fRoute) &&
+    (state.fCat==='all'    || r.cat===state.fCat) &&
+    (state.fPerson==='all' || r.author===state.fPerson) &&
+    (!state.fDate          || dateKey(r.ts)===state.fDate) &&
+    (!q || [r.customer,r.detail,r.memo,r.author,routeLabel(r.route),(CATS[r.cat]||{}).label]
+            .join(' ').toLowerCase().includes(q)));
+  // 絞り込み中の表示（キーワード・人・日付のいずれか）
+  const parts=[];
+  if(q) parts.push(`「${state.fSearch.trim()}」`);
+  if(state.fPerson!=='all') parts.push(`${state.fPerson}さん`);
+  if(state.fDate){ const [ ,mm,dd]=state.fDate.split('-').map(Number); parts.push(`${mm}月${dd}日`); }
+  const scEl=$('#search-count');
+  if(parts.length){ scEl.hidden=false; scEl.textContent=`${parts.join(' / ')} で絞り込み中：${list.length}件`; }
+  else scEl.hidden=true;
+  if(!list.length){
+    el.innerHTML = (q||anyAdvActive())
+      ? '<div class="empty">条件に合う報告が見つかりませんでした。<br>絞り込みを変えて試してみてください。</div>'
+      : '<div class="empty">まだ報告がありません。<br>「➕ 報告する」から送ってみてください。</div>';
+    return;
+  }
   let html='', lastDay='';
   for(const r of list){
     const dk=dateKey(r.ts);
@@ -566,8 +756,8 @@ function renderTimeline(){
     toast('送信を取り消しました');
   });
   attachPhotoHandlers(el);
-  // タイムライン表示中なら、一番新しい報告が見えるように下までスクロール
-  if(!$('#view-timeline').hidden)
+  // タイムライン表示中で、検索・絞り込みしていないときだけ最新までスクロール
+  if(!$('#view-timeline').hidden && !q && !anyAdvActive() && state.fRoute==='all' && state.fCat==='all')
     requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
 }
 
@@ -696,32 +886,39 @@ function renderShift(){
   else{ note.textContent=`⏰ 提出締切：${dlText}（締切を過ぎています。追加・変更はお早めに）`; note.className='deadline warn'; }
   const av=adminView();
   $('#shift-help').textContent = av
-    ? '日付をタップすると、その日に出勤できる人の一覧が見られます。数字は提出人数です。'
+    ? '提出されたシフトを1日ずつ並べています。各日に出勤できる人が一目で分かります。'
     : '出勤できる日をタップして選択（複数OK）→ 最後に「送信して保存」を押してください。毎月8日までに「21日〜翌月20日」の分を提出します。';
-  const lastDay=new Date(p.y,p.m+1,0).getDate();
-  $('#cal-container').innerHTML =
-    monthGridHTML(p.y,p.m,21,lastDay) + monthGridHTML(p.ny,p.nm,1,20);
-  $('#cal-container').querySelectorAll('.cal-cell:not(.blank)').forEach(c=>c.onclick=()=>{
-    const key=c.dataset.key;
-    if(adminView()){ state.selDate=key; }
-    else{ state.shiftSel.has(key) ? state.shiftSel.delete(key) : state.shiftSel.add(key); }
-    renderShift();
-  });
+  if(av){
+    // 管理者：1日単位の一覧
+    const todayK=dateKey(Date.now());
+    let html='<div class="daylist">';
+    for(const key of periodDates()){
+      const [yy,mm,dd]=key.split('-').map(Number);
+      const wd=WDAYS[new Date(yy,mm-1,dd).getDay()];
+      const g=new Date(yy,mm-1,dd).getDay();
+      const members=Object.keys(state.shifts[key]||{});
+      html+=`<div class="daylist-row${members.length?' has':''}${key===todayK?' today':''}">
+        <div class="daylist-date">${mm}/${dd}<span class="wd${g===0?' sun':g===6?' sat':''}">${wd}</span></div>
+        <div class="daylist-members">${members.length
+          ? members.map(n=>`<span class="member-tag">${esc(n)}</span>`).join('')
+          : '<span class="note">提出なし</span>'}</div>
+        <div class="daylist-cnt${members.length?'':' zero'}">${members.length}人</div>
+      </div>`;
+    }
+    $('#cal-container').innerHTML = html+'</div>';
+  }else{
+    const lastDay=new Date(p.y,p.m+1,0).getDate();
+    $('#cal-container').innerHTML =
+      monthGridHTML(p.y,p.m,21,lastDay) + monthGridHTML(p.ny,p.nm,1,20);
+    $('#cal-container').querySelectorAll('.cal-cell:not(.blank)').forEach(c=>c.onclick=()=>{
+      const key=c.dataset.key;
+      state.shiftSel.has(key) ? state.shiftSel.delete(key) : state.shiftSel.add(key);
+      renderShift();
+    });
+  }
   $('#shift-submit-bar').hidden=av;
   if(!av) $('#shift-sel-count').textContent=`選択中：${state.shiftSel.size}日（出勤できる日）`;
-  renderDayDetail();
-}
-
-function renderDayDetail(){
-  const el=$('#day-detail');
-  if(!adminView() || !state.selDate){ el.hidden=true; return; }
-  el.hidden=false;
-  const members=Object.keys(state.shifts[state.selDate]||{});
-  el.innerHTML=`
-    <h3>📅 ${fmtDateLabel(state.selDate)} に出勤できる人（${members.length}人）</h3>
-    <div>${members.length
-      ? members.map(n=>`<span class="member-tag">${esc(n)}</span>`).join('')
-      : '<span class="note">まだ誰も提出していません</span>'}</div>`;
+  $('#day-detail').hidden=true;
 }
 
 function sendShift(){
@@ -731,6 +928,111 @@ function sendShift(){
   for(const k of state.shiftSel) if(!cur.has(k)){ store.setShift(k,state.user.name,true); changed++; }
   for(const k of cur) if(!state.shiftSel.has(k)){ store.setShift(k,state.user.name,false); changed++; }
   toast(changed ? `シフトを送信しました（出勤可 ${state.shiftSel.size}日）` : '変更はありません');
+}
+</script>
+<script>
+/* ---------------- タイムカード（打刻・集計は21日〜翌月20日） ---------------- */
+function tcPeriodInfo(){
+  const {y,m}=state.tcPeriod;
+  const ny=m===11?y+1:y, nm=(m+1)%12;
+  return {y,m,ny,nm, label:`${m+1}/21 〜 ${nm+1}/20`};
+}
+function tcPeriodDates(){
+  const {y,m,ny,nm}=tcPeriodInfo(); const out=[];
+  const lastDay=new Date(y,m+1,0).getDate();
+  for(let d=21;d<=lastDay;d++) out.push(`${y}-${pad2(m+1)}-${pad2(d)}`);
+  for(let d=1;d<=20;d++) out.push(`${ny}-${pad2(nm+1)}-${pad2(d)}`);
+  return out;
+}
+function workedMin(rec){
+  if(!rec || !rec.inTime || !rec.outTime) return 0;
+  const m=Math.round((rec.outTime-rec.inTime)/60000);
+  return m>0 ? m : 0;
+}
+function fmtDur(min){
+  if(!min) return '0分';
+  const h=Math.floor(min/60), m=min%60;
+  return (h?`${h}時間`:'')+(m?`${m}分`:(h?'':'0分'));
+}
+function periodTotalFor(name){
+  let sum=0; for(const k of tcPeriodDates()) sum+=workedMin((state.timecards[k]||{})[name]);
+  return sum;
+}
+
+function renderTimecard(){
+  const admin=isAdmin();
+  $('#tc-mode').hidden=!admin;
+  const showAll = admin && state.tcMode==='all';
+  $('#tc-me').hidden=showAll;
+  $('#tc-all').hidden=!showAll;
+  if(showAll) renderTimecardAll(); else renderTimecardMe();
+}
+
+function renderTimecardMe(){
+  const name=state.user.name;
+  const todayK=dateKey(Date.now());
+  const rec=(state.timecards[todayK]||{})[name]||{};
+  const hasIn=!!rec.inTime, hasOut=!!rec.outTime;
+  let statusCls, statusTxt, times='';
+  if(!hasIn){ statusCls='none'; statusTxt='まだ出勤していません'; }
+  else if(!hasOut){ statusCls='working'; statusTxt='🟢 勤務中'; times=`出勤 ${fmtTime(rec.inTime)}`; }
+  else{ statusCls='done'; statusTxt='退勤済み・お疲れさまでした';
+    times=`出勤 ${fmtTime(rec.inTime)} 〜 退勤 ${fmtTime(rec.outTime)}`; }
+  const worked = hasOut ? `<div class="tc-worked">本日の勤務：${fmtDur(workedMin(rec))}</div>` : '';
+  $('#tc-me').innerHTML = `
+    <div class="tc-card">
+      <div class="tc-date">${fmtDateLabel(todayK)}</div>
+      <div class="tc-status ${statusCls}">${statusTxt}</div>
+      ${times?`<div class="tc-times">${times}</div>`:''}
+      ${worked}
+      <div class="tc-btns">
+        <button class="tc-btn tc-in" id="btn-punch-in" ${hasIn?'disabled':''}>出勤</button>
+        <button class="tc-btn tc-out" id="btn-punch-out" ${(!hasIn||hasOut)?'disabled':''}>退勤</button>
+      </div>
+    </div>
+    <div class="tc-total">
+      <span class="lbl">この期間の合計（${tcPeriodInfo().label}）</span>
+      <span class="val">${fmtDur(periodTotalFor(name))}</span>
+    </div>
+    <div class="tc-hist" id="tc-hist"></div>`;
+  const rows=[];
+  for(const k of tcPeriodDates()){
+    const r=(state.timecards[k]||{})[name];
+    if(r&&r.inTime){ const p=k.split('-').map(Number);
+      rows.push(`<div class="tc-hist-row">
+        <span class="d">${p[1]}/${p[2]}</span>
+        <span class="t">${fmtTime(r.inTime)}〜${r.outTime?fmtTime(r.outTime):'（勤務中）'}</span>
+        <span class="w">${r.outTime?fmtDur(workedMin(r)):''}</span></div>`);
+    }
+  }
+  $('#tc-hist').innerHTML = rows.length ? rows.reverse().join('')
+    : '<div class="note" style="text-align:center;padding:10px">この期間の打刻はまだありません</div>';
+  $('#btn-punch-in').onclick=()=>{ store.setPunch(todayK,name,{inTime:Date.now(),outTime:0});
+    toast('出勤しました。いってらっしゃい！'); };
+  $('#btn-punch-out').onclick=()=>{ store.setPunch(todayK,name,{outTime:Date.now()});
+    toast('退勤しました。お疲れさまでした！'); };
+}
+
+function renderTimecardAll(){
+  $('#tc-label').textContent=tcPeriodInfo().label+' 分';
+  const names=new Set();
+  for(const k of tcPeriodDates()) for(const n of Object.keys(state.timecards[k]||{})) names.add(n);
+  const body=$('#tc-all-body');
+  if(!names.size){ body.innerHTML='<div class="empty">この期間の打刻はまだありません</div>'; return; }
+  let html='';
+  for(const n of [...names].sort()){
+    let days='';
+    for(const k of tcPeriodDates()){
+      const r=(state.timecards[k]||{})[n];
+      if(r&&r.inTime){ const p=k.split('-').map(Number);
+        days+=`${p[1]}/${p[2]} ${fmtTime(r.inTime)}〜${r.outTime?fmtTime(r.outTime):'勤務中'}${r.outTime?`（${fmtDur(workedMin(r))}）`:''}<br>`; }
+    }
+    html+=`<div class="tc-person">
+      <div class="tc-person-head"><span>👤 ${esc(n)}</span>
+        <span class="tc-person-total">合計 ${fmtDur(periodTotalFor(n))}</span></div>
+      <div class="tc-person-days">${days||'<span class="note">打刻なし</span>'}</div></div>`;
+  }
+  body.innerHTML=html;
 }
 </script>
 <script>
@@ -863,12 +1165,14 @@ async function submitReport(e){
 
 /* ---------------- 画面切り替え ---------------- */
 function showView(name){
-  ['timeline','compose','todo','shift'].forEach(v=>$('#view-'+v).hidden=(v!==name));
+  ['timeline','compose','todo','shift','timecard'].forEach(v=>$('#view-'+v).hidden=(v!==name));
   $$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===name));
-  if(name==='timeline') requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
+  if(name==='timeline' && !state.fSearch && state.fRoute==='all' && state.fCat==='all')
+    requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
   else window.scrollTo(0,0);
   if(name==='shift') renderShift();
   if(name==='todo') renderTodo();
+  if(name==='timecard') renderTimecard();
 }
 
 /* ---------------- データ更新コールバック ---------------- */
@@ -878,6 +1182,8 @@ function reportsUpdated(list){
 }
 function shiftsUpdated(map){ state.shifts=map;
   if(state.user && !$('#view-shift').hidden) renderShift(); }
+function timecardsUpdated(map){ state.timecards=map;
+  if(state.user && !$('#view-timecard').hidden) renderTimecard(); }
 
 /* ---------------- ログイン ---------------- */
 function segInit(id){
@@ -895,9 +1201,13 @@ function showApp(){
   $('#shift-mode').hidden=!isAdmin();
   state.shiftMode='edit'; state.shiftSelPeriod=null; state.selDate=null;
   $$('#shift-mode button').forEach(b=>b.classList.toggle('on',b.dataset.v==='edit'));
+  state.tcMode='me'; state.tcPeriod=initTcPeriod();
+  $$('#tc-mode button').forEach(b=>b.classList.toggle('on',b.dataset.v==='me'));
   $('#todo-note').textContent = isAdmin()
     ? '配達完了以外の報告は自動でここに入ります。エクセルに反映したら「済」を押してください。'
     : '配達完了以外の報告は自動でここに入ります。「済」の処理（消し込み）は管理者が行います。';
+  state.fSearch=''; state.fPerson='all'; state.fDate=''; state.fRoute='all'; state.fCat='all';
+  $('#search-input').value=''; $('#search-wrap').classList.remove('active'); $('#adv-panel').hidden=true;
   buildFilterChips(); buildCatGrid();
   $('#todo-seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
     $('#todo-seg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
@@ -963,9 +1273,30 @@ function init(){
     toast('ログアウトしました。ログインし直してください');
   };
   // アプリ起動と同時にデータ接続（ログイン前でも接続だけ済ませておく）
-  store.init(reportsUpdated, shiftsUpdated)
+  store.init(reportsUpdated, shiftsUpdated, timecardsUpdated)
     .catch(e=>toast('接続エラー：'+e.message));
   $$('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+  // 検索
+  const doSearch=()=>{ state.fSearch=$('#search-input').value;
+    $('#search-wrap').classList.toggle('active', !!state.fSearch); renderTimeline(); };
+  $('#search-input').oninput=doSearch;
+  $('#search-clear').onclick=()=>{ $('#search-input').value=''; state.fSearch='';
+    $('#search-wrap').classList.remove('active'); renderTimeline(); $('#search-input').focus(); };
+  // 詳しく絞り込む（報告した人・日付）
+  $('#adv-btn').onclick=()=>{ const p=$('#adv-panel'); p.hidden=!p.hidden; };
+  $('#f-person').onchange=()=>{ state.fPerson=$('#f-person').value; renderTimeline(); };
+  $('#f-date-input').onchange=()=>{ state.fDate=$('#f-date-input').value; renderTimeline(); };
+  $$('#adv-panel .adv-date .chip').forEach(b=>b.onclick=()=>{
+    const d=new Date(); if(b.dataset.quick==='yesterday') d.setDate(d.getDate()-1);
+    state.fDate=dateKey(d.getTime()); renderTimeline(); });
+  $('#adv-clear').onclick=()=>{ state.fPerson='all'; state.fDate=''; renderTimeline(); };
+  // タイムカード
+  $$('#tc-mode button').forEach(b=>b.onclick=()=>{
+    $$('#tc-mode button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); state.tcMode=b.dataset.v; renderTimecard(); });
+  $('#tc-prev').onclick=()=>{ const p=state.tcPeriod; p.m--; if(p.m<0){p.m=11;p.y--;} renderTimecard(); };
+  $('#tc-next').onclick=()=>{ const p=state.tcPeriod; p.m++; if(p.m>11){p.m=0;p.y++;} renderTimecard(); };
+  $('#tc-today').onclick=()=>{ state.tcPeriod=initTcPeriod(); renderTimecard(); };
   $('#cal-prev').onclick=()=>{ const p=state.period; p.m--; if(p.m<0){p.m=11;p.y--;}
     state.selDate=null; renderShift(); };
   $('#cal-next').onclick=()=>{ const p=state.period; p.m++; if(p.m>11){p.m=0;p.y++;}

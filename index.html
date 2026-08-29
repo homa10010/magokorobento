@@ -200,6 +200,40 @@ nav button.on{color:var(--primary)}
 .adv-date .chip{flex:0 0 auto}
 .adv-date input[type=date]{flex:1;min-width:130px}
 
+/* ---------- お知らせ掲示 ---------- */
+.ann-area{margin:0 0 10px}
+.ann{background:#fff7ef;border:1.5px solid #f3d9bd;border-radius:12px;padding:9px 12px;
+  display:flex;gap:9px;align-items:flex-start;margin-bottom:7px}
+.ann-ico{font-size:17px;line-height:1.3}
+.ann-body{flex:1;min-width:0}
+.ann-text{font-size:14px;font-weight:700;color:var(--text);white-space:pre-wrap}
+.ann-meta{font-size:11.5px;color:var(--sub);margin-top:2px}
+.ann-del{flex:0 0 auto;font-size:16px;font-weight:800;color:var(--sub);padding:0 4px;line-height:1}
+.ann-post{display:flex;gap:6px;margin-top:2px}
+.ann-post input{flex:1}
+.ann-post button{flex:0 0 auto;background:var(--primary);color:#fff;font-weight:700;
+  border-radius:10px;padding:0 14px;font-size:13.5px;white-space:nowrap}
+
+/* ---------- 書き出しバー ---------- */
+.export-bar{margin:0 0 10px}
+.export-bar button{width:100%;background:#eef6ef;color:var(--green);border:1.5px solid #bfe3cb;
+  border-radius:10px;padding:9px;font-size:13px;font-weight:800}
+.export-bar button:active{background:#e0efe4}
+
+/* ---------- 報告へのコメント ---------- */
+.comment-btn{font-size:11.5px;font-weight:700;color:var(--sub);border:1.5px solid var(--line);
+  border-radius:99px;padding:2px 10px;background:#fff}
+.comment-btn.has{color:var(--blue);border-color:#bcd6f0;background:#f0f6fd}
+.comment-thread{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+.comment{font-size:13px;color:var(--text);background:#f7f5f1;border-radius:9px;
+  padding:6px 10px;margin-bottom:5px}
+.comment .c-author{font-weight:800;color:var(--blue);margin-right:6px}
+.comment .c-time{font-size:10.5px;color:var(--sub);margin-left:6px}
+.comment-input{display:flex;gap:6px;margin-top:4px}
+.comment-input input{flex:1;font-size:15px;padding:8px 10px}
+.comment-input .c-send{flex:0 0 auto;background:var(--blue);color:#fff;font-weight:700;
+  border-radius:9px;padding:0 14px;font-size:13.5px}
+
 /* ---------- タイムカード（打刻） ---------- */
 .tc-card{background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 2px 8px rgba(60,40,10,.08);
   text-align:center;margin-bottom:14px}
@@ -420,7 +454,7 @@ const FIREBASE_CONFIG = {
   projectId: "magokoro-be761",
   storageBucket: "magokoro-be761.firebasestorage.app",
   messagingSenderId: "283232775392",
-  appId: "1:283232775392:web:9c4affe8623f17d59d3485"
+  appId: "1:283232775392:web:7b11ff0270732df99d3485"
 };
 
 /* ★ 管理者コード：ログイン時に「管理者」を選ぶには、このコードの入力が必要です。
@@ -512,6 +546,9 @@ const state = {
   reports:[],           // {id,ts,author,route,cat,customer,detail,memo,needsAction,done,doneBy,doneAt}
   shifts:{},            // {'2026-07-21': {名前:true,...}}
   timecards:{},         // {'2026-08-04': {名前:{inTime,outTime}}}
+  comments:{},          // {reportId: [{id,author,text,ts},...]}
+  announcements:[],     // [{id,author,text,ts},...]
+  openComments:null,    // 現在コメント欄を開いている報告ID
   fRoute:'all', fCat:'all', fSearch:'', fPerson:'all', fDate:'',
   todoTab:'open',
   period:initPeriod(),  // {y,m} → m月21日〜翌月20日
@@ -568,18 +605,37 @@ function seedTimecards(){
   put(0,'細川',8,52,null);   // 今日：出勤中（退勤まだ）
   return tc;
 }
+function seedComments(){
+  // デモ用：報告へのコメント（reportId → コメント配列）
+  const now=Date.now();
+  return {
+    'demo7':[ {id:'sc1', author:'原田', text:'三連休前なので、本日中に前田自動車で見てもらってください。', ts:now-3600000} ],
+    'demo3':[ {id:'sc2', author:'原田', text:'宮地様、電話あったら内容を共有お願いします。', ts:now-3000000} ],
+  };
+}
+function seedAnnouncements(){
+  const now=Date.now();
+  return [ {id:'sa1', author:'原田', text:'明日は雨予報です。保冷箱のフタ・玄関先の足元に注意してください。', ts:now-7200000} ];
+}
 
 /* ---------------- データ層（デモ / Firebase 共通インターフェース） ---------------- */
 class DemoStore{
   constructor(){ this.reports=seedReports(); this.shifts=seedShifts(); this.accounts={};
-    this.images={}; this.timecards=seedTimecards(); this._id=0; this._imgId=0; }
+    this.images={}; this.timecards=seedTimecards(); this.comments=seedComments();
+    this.announcements=seedAnnouncements(); this._id=0; this._imgId=0; this._cId=0; this._aId=0; }
   async addImage(data){ const id='img'+(++this._imgId); this.images[id]=data; return id; }
   async getImage(id){ return this.images[id]||null; }
   deleteImage(id){ delete this.images[id]; }
-  async init(onReports,onShifts,onTimecards){ this.onR=onReports; this.onS=onShifts; this.onT=onTimecards;
-    onReports(this.reports); onShifts(this.shifts); onTimecards(this.timecards); }
+  async init(onReports,onShifts,onTimecards,onComments,onAnnouncements){
+    this.onR=onReports; this.onS=onShifts; this.onT=onTimecards; this.onC=onComments; this.onA=onAnnouncements;
+    onReports(this.reports); onShifts(this.shifts); onTimecards(this.timecards);
+    onComments(this.comments); onAnnouncements(this.announcements); }
   setPunch(date,name,patch){ const d=this.timecards[date]||(this.timecards[date]={});
     d[name]=Object.assign({}, d[name], patch); this.onT(this.timecards); }
+  addComment(reportId,c){ c.id='c'+(++this._cId);
+    (this.comments[reportId]=this.comments[reportId]||[]).push(c); this.onC(this.comments); }
+  addAnnouncement(a){ a.id='a'+(++this._aId); this.announcements.push(a); this.onA(this.announcements); }
+  deleteAnnouncement(id){ this.announcements=this.announcements.filter(x=>x.id!==id); this.onA(this.announcements); }
   async getAccount(name){ return this.accounts[name]||null; }
   async createAccount(a){
     if(this.accounts[a.name]) throw new Error('その名前はすでに登録されています');
@@ -597,7 +653,7 @@ function loadScript(src){ return new Promise((res,rej)=>{
   s.onerror=()=>rej(new Error('読み込み失敗: '+src)); document.head.appendChild(s); }); }
 
 class FirebaseStore{
-  async init(onReports,onShifts,onTimecards){
+  async init(onReports,onShifts,onTimecards,onComments,onAnnouncements){
     const V='10.12.2';
     await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
     await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
@@ -616,7 +672,21 @@ class FirebaseStore{
         snap.docs.forEach(d=>{ const v=d.data();
           (m[v.date]=m[v.date]||{})[v.name]={inTime:v.inTime||0, outTime:v.outTime||0}; });
         onTimecards(m); }, err=>toast('通信エラー：'+err.message));
+    this.db.collection('comments').orderBy('ts','asc').limitToLast(1000)
+      .onSnapshot(snap=>{ const m={};
+        snap.docs.forEach(d=>{ const v=d.data();
+          (m[v.reportId]=m[v.reportId]||[]).push({id:d.id, ...v}); });
+        onComments(m); }, err=>toast('通信エラー：'+err.message));
+    this.db.collection('announcements').orderBy('ts','asc').limitToLast(50)
+      .onSnapshot(snap=>{ onAnnouncements(snap.docs.map(d=>({id:d.id, ...d.data()}))); },
+        err=>toast('通信エラー：'+err.message));
   }
+  addComment(reportId,c){ this.db.collection('comments').add(Object.assign({reportId},c))
+    .catch(e=>toast('コメント送信エラー：'+e.message)); }
+  addAnnouncement(a){ this.db.collection('announcements').add(a)
+    .catch(e=>toast('お知らせ送信エラー：'+e.message)); }
+  deleteAnnouncement(id){ this.db.collection('announcements').doc(id).delete()
+    .catch(e=>toast('削除エラー：'+e.message)); }
   setPunch(date,name,patch){ const ref=this.db.collection('timecards').doc(date+'_'+name);
     ref.set(Object.assign({date,name}, patch), {merge:true})
       .catch(e=>toast('打刻エラー：'+e.message)); }
@@ -671,6 +741,18 @@ function reportCard(r, forTodo){
   // 送信取り消し：自分の報告（管理者は全員の報告）に表示
   const canRetract = state.user && (r.author===state.user.name || isAdmin());
   const retract = canRetract ? `<button class="retract" data-id="${r.id}">取消</button>` : '';
+  // コメント
+  const cList = state.comments[r.id] || [];
+  const open = state.openComments===r.id;
+  const commentBtn = `<button class="comment-btn${cList.length?' has':''}" data-cid="${r.id}">💬 ${cList.length?('コメント '+cList.length):'コメント'}</button>`;
+  const thread = open ? `
+    <div class="comment-thread">
+      ${cList.map(c=>`<div class="comment"><span class="c-author">${esc(c.author)}</span>${esc(c.text)}<span class="c-time">${fmtTime(c.ts)}</span></div>`).join('') || '<div class="note" style="padding:2px 0 6px">まだコメントはありません</div>'}
+      <div class="comment-input">
+        <input class="c-text" data-cid="${r.id}" placeholder="コメントを書く…" autocomplete="off" maxlength="200">
+        <button class="c-send" data-cid="${r.id}">送信</button>
+      </div>
+    </div>` : '';
   return `
     <div class="card" style="border-left-color:${cat.color}">
       <div class="card-top">
@@ -681,8 +763,28 @@ function reportCard(r, forTodo){
       <div class="card-main">${r.customer?`<b>${esc(r.customer)}</b>　`:''}${esc(r.detail||'')}</div>
       ${r.memo?`<div class="card-memo">${esc(r.memo)}</div>`:''}
       ${r.photoThumb?`<img class="card-photo" src="${r.photoThumb}" data-photo="${esc(r.photoId||'')}" alt="写真">`:''}
-      <div class="card-foot"><span class="card-author">👤 ${esc(r.author)}</span>${retract}${status}</div>
+      <div class="card-foot"><span class="card-author">👤 ${esc(r.author)}</span>${commentBtn}${retract}${status}</div>
+      ${thread}
     </div>`;
+}
+
+/* 報告カードのコメント操作を配線 */
+function attachCommentHandlers(root){
+  root.querySelectorAll('.comment-btn').forEach(b=>b.onclick=()=>{
+    state.openComments = (state.openComments===b.dataset.cid) ? null : b.dataset.cid;
+    renderTimeline();
+  });
+  root.querySelectorAll('.c-send').forEach(b=>b.onclick=()=>{
+    const inp=root.querySelector(`.c-text[data-cid="${b.dataset.cid}"]`);
+    const text=(inp?inp.value:'').trim();
+    if(!text){ toast('コメントを入力してください'); return; }
+    store.addComment(b.dataset.cid, {author:state.user.name, text, ts:Date.now()});
+    toast('コメントを送信しました');
+  });
+  root.querySelectorAll('.c-text').forEach(inp=>inp.onkeydown=e=>{
+    if(e.key==='Enter'){ e.preventDefault();
+      root.querySelector(`.c-send[data-cid="${inp.dataset.cid}"]`).click(); }
+  });
 }
 
 /* 写真タップ → 拡大表示（拡大用の画像は必要になったときだけ読み込む） */
@@ -694,6 +796,91 @@ function attachPhotoHandlers(root){
     const id=im.dataset.photo;
     if(id){ try{ const data=await store.getImage(id); if(data) big.src=data; }catch(e){} }
   });
+}
+
+/* ---------------- CSV書き出し ---------------- */
+function csvCell(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; }
+function todayStamp(){ const d=new Date();
+  return d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate()); }
+function downloadCSV(filename, rows){
+  const csv='﻿'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function filteredReports(){
+  const q=state.fSearch.trim().toLowerCase();
+  return state.reports.filter(r=>
+    (state.fRoute==='all'  || r.route===state.fRoute) &&
+    (state.fCat==='all'    || r.cat===state.fCat) &&
+    (state.fPerson==='all' || r.author===state.fPerson) &&
+    (!state.fDate          || dateKey(r.ts)===state.fDate) &&
+    (!q || [r.customer,r.detail,r.memo,r.author,routeLabel(r.route),(CATS[r.cat]||{}).label]
+            .join(' ').toLowerCase().includes(q)));
+}
+function exportReportsCSV(){
+  const rows=[['日付','時刻','ルート','種類','お客様','内容','メモ','報告者','要対応','処理状況','処理者']];
+  for(const r of filteredReports())
+    rows.push([dateKey(r.ts), fmtTime(r.ts), routeLabel(r.route), (CATS[r.cat]||{}).label||r.cat,
+      r.customer||'', r.detail||'', r.memo||'', r.author,
+      r.needsAction?'要対応':'', r.needsAction?(r.done?'処理済み':'未処理'):'', r.done?(r.doneBy||''):'']);
+  downloadCSV(`報告_${todayStamp()}.csv`, rows);
+  toast('報告をCSVに書き出しました');
+}
+function exportTimecardsCSV(){
+  const rows=[['名前','日付','出勤','退勤','勤務時間(分)','勤務時間']];
+  const names=new Set();
+  for(const k of tcPeriodDates()) for(const n of Object.keys(state.timecards[k]||{})) names.add(n);
+  for(const n of [...names].sort()){
+    let totMin=0;
+    for(const k of tcPeriodDates()){
+      const r=(state.timecards[k]||{})[n]; if(!r||!r.inTime) continue;
+      const mm=workedMin(r); totMin+=mm;
+      rows.push([n, k, fmtTime(r.inTime), r.outTime?fmtTime(r.outTime):'', mm||'', mm?fmtDur(mm):'']);
+    }
+    rows.push([n, '（'+tcPeriodInfo().label+' 合計）', '', '', totMin, fmtDur(totMin)]);
+  }
+  downloadCSV(`勤怠_${tcPeriodInfo().label.replace(/[ 〜\/]/g,'')}.csv`, rows);
+  toast('勤怠をCSVに書き出しました');
+}
+function exportShiftsCSV(){
+  const rows=[['日付','曜日','人数','出勤できる人']];
+  for(const key of periodDates()){
+    const [yy,mm,dd]=key.split('-').map(Number);
+    const wd=WDAYS[new Date(yy,mm-1,dd).getDay()];
+    const members=Object.keys(state.shifts[key]||{});
+    rows.push([key, wd, members.length, members.join('、')]);
+  }
+  downloadCSV(`シフト_${periodInfo().label.replace(/[ 〜\/]/g,'')}.csv`, rows);
+  toast('シフトをCSVに書き出しました');
+}
+
+/* ---------------- お知らせ掲示 ---------------- */
+function announcementsHTML(){
+  let html='<div class="ann-area">';
+  for(const a of state.announcements)
+    html+=`<div class="ann"><span class="ann-ico">📢</span>
+      <div class="ann-body"><div class="ann-text">${esc(a.text)}</div>
+      <div class="ann-meta">${esc(a.author)}・${fmtDateLabel(dateKey(a.ts))} ${fmtTime(a.ts)}</div></div>
+      ${isAdmin()?`<button class="ann-del" data-aid="${a.id}" aria-label="削除">×</button>`:''}</div>`;
+  if(isAdmin())
+    html+=`<div class="ann-post"><input id="ann-input" placeholder="お知らせを書く（全員に固定表示）" maxlength="200" autocomplete="off"><button id="ann-send">📢 出す</button></div>`;
+  return html+'</div>';
+}
+function attachAnnHandlers(root){
+  root.querySelectorAll('.ann-del').forEach(b=>b.onclick=()=>{
+    if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='消す？';
+      setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent='×'; } },3000); return; }
+    store.deleteAnnouncement(b.dataset.aid); toast('お知らせを消しました');
+  });
+  const send=root.querySelector('#ann-send'), inp=root.querySelector('#ann-input');
+  if(send) send.onclick=()=>{ const t=(inp.value||'').trim();
+    if(!t){ toast('お知らせの内容を入力してください'); return; }
+    store.addAnnouncement({author:state.user.name, text:t, ts:Date.now()});
+    toast('お知らせを出しました'); };
+  if(inp) inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); send.click(); } };
 }
 
 function buildPersonOptions(){
@@ -715,13 +902,7 @@ function renderTimeline(){
   const el=$('#timeline');
   const q=state.fSearch.trim().toLowerCase();
   buildPersonOptions(); updateAdvUI();
-  const list = state.reports.filter(r=>
-    (state.fRoute==='all'  || r.route===state.fRoute) &&
-    (state.fCat==='all'    || r.cat===state.fCat) &&
-    (state.fPerson==='all' || r.author===state.fPerson) &&
-    (!state.fDate          || dateKey(r.ts)===state.fDate) &&
-    (!q || [r.customer,r.detail,r.memo,r.author,routeLabel(r.route),(CATS[r.cat]||{}).label]
-            .join(' ').toLowerCase().includes(q)));
+  const list = filteredReports();
   // 絞り込み中の表示（キーワード・人・日付のいずれか）
   const parts=[];
   if(q) parts.push(`「${state.fSearch.trim()}」`);
@@ -730,19 +911,26 @@ function renderTimeline(){
   const scEl=$('#search-count');
   if(parts.length){ scEl.hidden=false; scEl.textContent=`${parts.join(' / ')} で絞り込み中：${list.length}件`; }
   else scEl.hidden=true;
+  // 先頭：お知らせ掲示（＋管理者の書き出しバー）
+  const topHTML = announcementsHTML()
+    + (isAdmin() && list.length ? `<div class="export-bar"><button id="export-reports">📥 表示中の報告をCSVで書き出し（${list.length}件）</button></div>` : '');
   if(!list.length){
-    el.innerHTML = (q||anyAdvActive())
+    el.innerHTML = topHTML + ((q||anyAdvActive())
       ? '<div class="empty">条件に合う報告が見つかりませんでした。<br>絞り込みを変えて試してみてください。</div>'
-      : '<div class="empty">まだ報告がありません。<br>「➕ 報告する」から送ってみてください。</div>';
+      : '<div class="empty">まだ報告がありません。<br>「➕ 報告する」から送ってみてください。</div>');
+    attachAnnHandlers(el);
     return;
   }
-  let html='', lastDay='';
+  let html=topHTML, lastDay='';
   for(const r of list){
     const dk=dateKey(r.ts);
     if(dk!==lastDay){ html+=`<div class="date-sep"><span>${fmtDateLabel(dk)}</span></div>`; lastDay=dk; }
     html+=reportCard(r);
   }
   el.innerHTML=html;
+  attachAnnHandlers(el);
+  attachCommentHandlers(el);
+  const exp=$('#export-reports'); if(exp) exp.onclick=exportReportsCSV;
   // 送信取り消し（押し間違い防止のため2回タップ）
   el.querySelectorAll('.retract').forEach(b=>b.onclick=()=>{
     if(!b.dataset.arm){
@@ -756,8 +944,13 @@ function renderTimeline(){
     toast('送信を取り消しました');
   });
   attachPhotoHandlers(el);
-  // タイムライン表示中で、検索・絞り込みしていないときだけ最新までスクロール
-  if(!$('#view-timeline').hidden && !q && !anyAdvActive() && state.fRoute==='all' && state.fCat==='all')
+  // コメント欄を開いているときはそこに入力できるようフォーカス
+  if(state.openComments){
+    const ci=el.querySelector(`.c-text[data-cid="${state.openComments}"]`);
+    if(ci) ci.focus();
+  }
+  // タイムライン表示中で、検索・絞り込み・コメント展開のいずれもないときだけ最新までスクロール
+  else if(!$('#view-timeline').hidden && !q && !anyAdvActive() && state.fRoute==='all' && state.fCat==='all')
     requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));
 }
 
@@ -891,7 +1084,7 @@ function renderShift(){
   if(av){
     // 管理者：1日単位の一覧
     const todayK=dateKey(Date.now());
-    let html='<div class="daylist">';
+    let html='<div class="export-bar"><button id="export-shifts">📥 このシフトをCSVで書き出し</button></div><div class="daylist">';
     for(const key of periodDates()){
       const [yy,mm,dd]=key.split('-').map(Number);
       const wd=WDAYS[new Date(yy,mm-1,dd).getDay()];
@@ -906,6 +1099,7 @@ function renderShift(){
       </div>`;
     }
     $('#cal-container').innerHTML = html+'</div>';
+    const es=$('#export-shifts'); if(es) es.onclick=exportShiftsCSV;
   }else{
     const lastDay=new Date(p.y,p.m+1,0).getDate();
     $('#cal-container').innerHTML =
@@ -1019,7 +1213,7 @@ function renderTimecardAll(){
   for(const k of tcPeriodDates()) for(const n of Object.keys(state.timecards[k]||{})) names.add(n);
   const body=$('#tc-all-body');
   if(!names.size){ body.innerHTML='<div class="empty">この期間の打刻はまだありません</div>'; return; }
-  let html='';
+  let html='<div class="export-bar"><button id="export-timecards">📥 この期間の勤怠をCSVで書き出し</button></div>';
   for(const n of [...names].sort()){
     let days='';
     for(const k of tcPeriodDates()){
@@ -1033,6 +1227,7 @@ function renderTimecardAll(){
       <div class="tc-person-days">${days||'<span class="note">打刻なし</span>'}</div></div>`;
   }
   body.innerHTML=html;
+  const et=$('#export-timecards'); if(et) et.onclick=exportTimecardsCSV;
 }
 </script>
 <script>
@@ -1184,6 +1379,10 @@ function shiftsUpdated(map){ state.shifts=map;
   if(state.user && !$('#view-shift').hidden) renderShift(); }
 function timecardsUpdated(map){ state.timecards=map;
   if(state.user && !$('#view-timecard').hidden) renderTimecard(); }
+function commentsUpdated(map){ state.comments=map;
+  if(state.user && !$('#view-timeline').hidden) renderTimeline(); }
+function announcementsUpdated(list){ state.announcements=[...list].sort((a,b)=>a.ts-b.ts);
+  if(state.user && !$('#view-timeline').hidden) renderTimeline(); }
 
 /* ---------------- ログイン ---------------- */
 function segInit(id){
@@ -1206,7 +1405,7 @@ function showApp(){
   $('#todo-note').textContent = isAdmin()
     ? '配達完了以外の報告は自動でここに入ります。エクセルに反映したら「済」を押してください。'
     : '配達完了以外の報告は自動でここに入ります。「済」の処理（消し込み）は管理者が行います。';
-  state.fSearch=''; state.fPerson='all'; state.fDate=''; state.fRoute='all'; state.fCat='all';
+  state.fSearch=''; state.fPerson='all'; state.fDate=''; state.fRoute='all'; state.fCat='all'; state.openComments=null;
   $('#search-input').value=''; $('#search-wrap').classList.remove('active'); $('#adv-panel').hidden=true;
   buildFilterChips(); buildCatGrid();
   $('#todo-seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
@@ -1273,7 +1472,7 @@ function init(){
     toast('ログアウトしました。ログインし直してください');
   };
   // アプリ起動と同時にデータ接続（ログイン前でも接続だけ済ませておく）
-  store.init(reportsUpdated, shiftsUpdated, timecardsUpdated)
+  store.init(reportsUpdated, shiftsUpdated, timecardsUpdated, commentsUpdated, announcementsUpdated)
     .catch(e=>toast('接続エラー：'+e.message));
   $$('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
   // 検索

@@ -513,11 +513,18 @@ input[type=file]{padding:8px;background:#faf8f5}
      貼り付けてください（手順書「セットアップ手順.md」参照）。
      null のままだと「デモ体験版」として動きます（データ共有なし）。
    ===================================================================== */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG ={
+  apiKey: "AIzaSyAC4BDXgGjS_pvyhDvSQJtF7iiAqOsWjZk",
+  authDomain: "magokoro-be761.firebaseapp.com",
+  projectId: "magokoro-be761",
+  storageBucket: "magokoro-be761.firebasestorage.app",
+  messagingSenderId: "283232775392",
+  appId: "1:283232775392:web:7b11ff0270732df99d3485"
+};
 
 /* ★ 管理者コード：ログイン時に「管理者」を選ぶには、このコードの入力が必要です。
    本番で使う前に必ず好きな数字に変更してください。 */
-const ADMIN_CODE = '1234';
+const ADMIN_CODE = '0217';
 
 /* 例：
 const FIREBASE_CONFIG = {

@@ -80,7 +80,7 @@
   <main>
 
     <!-- トーク -->
-    <section id="view-chat" class="view">
+    <section id="view-chat" class="view" hidden>
       <div id="chat-list-wrap">
         <h2>トーク</h2>
         <div id="notify-bar" hidden>
@@ -153,7 +153,7 @@
     </section>
 
     <!-- 報告（タイムライン） -->
-    <section id="view-timeline" class="view" hidden>
+    <section id="view-timeline" class="view">
       <div class="filters">
         <div class="search-wrap" id="search-wrap">
           <span class="s-ico"><svg class="i"><use href="#ic-search"/></svg></span>
@@ -257,8 +257,8 @@
 
   </main>
   <nav>
-    <button data-view="timeline"><svg class="i"><use href="#ic-report"/></svg>報告</button>
-    <button data-view="chat" class="on"><svg class="i"><use href="#ic-talk"/></svg>チャット<span class="nav-badge" id="chat-badge" hidden></span></button>
+    <button data-view="timeline" class="on"><svg class="i"><use href="#ic-report"/></svg>報告</button>
+    <button data-view="chat"><svg class="i"><use href="#ic-talk"/></svg>チャット<span class="nav-badge" id="chat-badge" hidden></span></button>
     <button data-view="todo" id="nav-todo" hidden><svg class="i"><use href="#ic-todo"/></svg>要対応<span class="nav-badge" id="todo-badge" hidden></span></button>
     <button data-view="shift"><svg class="i"><use href="#ic-shift"/></svg>シフト</button>
     <button data-view="timecard"><svg class="i"><use href="#ic-clock"/></svg>勤怠</button>

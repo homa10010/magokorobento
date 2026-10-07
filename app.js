@@ -1262,7 +1262,7 @@ function showApp(){
   // トーク
   state.chatChannel=null; loadLastRead(); updateChatBadge();
   renderTimeline(); renderTodo(); updateBadge();
-  showView('chat');
+  showView('timeline');   // 最初の画面は報告
 }
 function logout(msg){
   state.user=null; safeStorage.del('mgk_user'); document.body.classList.remove('thread');
